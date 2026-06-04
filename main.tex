@@ -16,7 +16,16 @@
     style=numeric,
     sorting=none
 ]{biblatex}
-
+\usepackage{microtype}
+\usepackage{listings}
+\lstdefinestyle{ascii-tree}{
+	escapeinside={&*}{*&}, % <--- AÑADE ESTA LÍNEA
+	literate=
+	{├}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}\raisebox{0.5ex}{\rule{1ex}{1pt}}}}1 
+	{─}{{\raisebox{0.5ex}{\rule{1.5ex}{1pt}}}}1 
+	{└}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}}}1 % (O como lo tengas)
+}
+ \usepackage{dirtree}
 \addbibresource{TFG.bib}
 
 \title{Inteligencia Artificial On‑Premise para el análisis de IoCs con datos privados}
@@ -32,7 +41,16 @@
 \setlength{\oddsidemargin}{0.46cm}     % Margen izquierdo 
 \setlength{\evensidemargin}{0.46cm}    
 
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\newcommand{\subsubsubsection}[1]{\paragraph{#1}}
 
+\makeatletter
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+	{-3.25ex\@plus -1ex \@minus -.2ex}% Espaciado antes del título
+	{1.5ex \@plus.2ex}% Espaciado después (un valor positivo fuerza el salto de línea)
+	{\normalfont\normalsize\bfseries}} % Estilo de fuente (negrita, tamaño normal)
+\makeatother
 
 \begin{document}
 
@@ -150,7 +168,7 @@ Para alcanzar este fin, se proponen los siguientes objetivos específicos:
     \item \textbf{Evaluación comparativa de modelos de lenguaje especializados:} Evaluar el rendimiento, el nivel de detalle técnico, la tasa de alucinaciones y la precisión de múltiples modelos de lenguaje de diferentes escalas de parámetros en tareas complejas de correlación y análisis de indicadores.
 \end{itemize}
 \subsection{Estructura del documento}
-
+El presente documento se estructura en diferentes secciones con subsecciones. En la segunda sección se explican los conocimientos teóricos previos a tener en cuenta sobre diferentes conceptos clave para entender el desarrollo del proyecto. En la tercera sección se detalla cuál es la arquitectura del proyecto, qué componentes se han utilizado, qué tecnologías se han usado para desarrollar o desplegar cada uno de estos componentes, así como qué organización tienen y cómo se despliegan físicamente cada uno, y finalmente explica el workflow general del sistema, es decir, cómo cumple cada componente su cometido. En la cuarta sección se detallan las pruebas que se han realizado al sistema, se recogen y presentan los resultados obtenidos y se realiza un análisis de los mismos. Finalmente, en la última sección, la quinta, se analiza todo el contexto y trabajo desarrollado para extraer unas conclusiones, y se reflexiona sobre qué otras funcionalidades se podrían añadir al proyecto en caso de continuar con el desarrollo.
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% Conceptos previos
@@ -256,7 +274,7 @@ Con el propósito de estructurar de forma modular el asistente inteligente, cuya
 
     Para la implementación de este almacén de vectores se seleccionó \textit{ChromaDB}. En primer lugar, se define como una base de datos vectorial de código abierto altamente ligera y optimizada para despliegues locales (\textit{on-premise}), lo que evita introducir una sobrecarga de infraestructura compleja o costosa en el servidor. En segundo lugar, su arquitectura modular permite que la base de datos se ejecute de forma embebida directamente dentro del proceso de Python o de manera independiente mediante un contenedor, lo que optimiza drásticamente el uso de recursos y memoria RAM en entornos limitados a CPU. Finalmente, destaca su excelente compatibilidad con el ecosistema de desarrollo de Python y su amplia adopción en la comunidad, lo que garantiza una API sencilla para operaciones de inserción, consulta, actualización y borrado (CRUD), así como un soporte nativo para el filtrado avanzado de metadatos.
     
-    \item \textbf{Módulo de comunicación, ingesta y normalización de ciberinteligencia:} Este componente representa la capa de software desarrollada a medida para interactuar con la plataforma OpenCTI, resolviendo la adquisición de datos de seguridad y su transformación hacia la base de datos vectorial. La conectividad lógica con el servidor se implementa bajo el patrón de diseño \textit{Singleton} con soporte multihilo (\textit{thread-safe}) mediante un mecanismo de exclusión mutua (\textit{lock}), garantizando que exista una única instancia activa del cliente de API oficial (\texttt{OpenCTIApiClient}) durante la ejecución del sistema, lo que evita la saturación de conexiones GraphQL en el nodo de OpenCTI.
+    \item \textbf{Módulo de comunicación, ingesta y normalización de ciberinteligencia:} Este componente representa la capa de software desarrollada a medida para interactuar con la plataforma OpenCTI, resolviendo la adquisición de datos de seguridad y su transformación hacia la base de datos vectorial. La conectividad lógica con el servidor se implementa bajo el patrón de diseño \textit{Singleton} con soporte multihilo (\textit{thread-safe}) mediante un mecanismo de exclusión mutua (\textit{lock}), garantizando que exista una única instancia activa del cliente de API oficial (\texttt{OpenCTIApiClient}) durante la ejecuPartes del sistema ...ción del sistema, lo que evita la saturación de conexiones GraphQL en el nodo de OpenCTI.
 
 Sobre esta infraestructura de conexión se articulan tres subcomponentes de desarrollo propio en Python:
 \begin{itemize}
@@ -288,11 +306,75 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
     \caption{Diagrama de despliegue con comunicaciones}
     \label{fig:despliegue}
 \end{figure}
+\begin{figure}[]
+	\centering
+	\begin{tcolorbox}[
+		colback=gray!5,                    % Fondo gris suave
+		colframe=gray!50,                  % Borde del recuadro
+		arc=0mm,                           % Esquinas rectas
+		boxrule=0.5pt,                     % Grosor del borde
+		width=0.95\linewidth,              % Ancho del contenedor
+		coltitle=black,
+		colbacktitle=gray!15,              % Fondo de la cabecera
+		fonttitle=\small\bfseries,
+		sharp corners,
+		before skip=10pt,                  % Espaciado antes del recuadro
+		after skip=10pt                    % Espaciado después del recuadro
+		]
+		\dirtree{%
+			.1 /opt.
+			.2 chat-feats.
+			.3 docker-compose.yml.
+			.3 README.md.
+			.2 modelos\_ia.
+			.3 all-MiniLM-L6-v2.
+			.3 cyberpal.
+			.4 Modelfile.
+			.3 lily.
+			.4 Modelfile.
+			.2 ollama.
+			.2 openwebui\_data.
+			.2 openwebui\_pipelines.
+			.3 cybeross\_pipeline.
+			.3 lily\_pipeline.
+			.3 rag\_pipeline.
+			.3 cybeross\_pipeline.py.
+			.3 lily\_pipeline.py.
+			.2 python-scripts.
+			.3 opencti.
+			.4 chroma\_load.py.
+			.4 client.py.
+			.4 count\_objects.py.
+			.4 embed\_all\_st.py.
+			.4 ingest.py.
+			.4 normalize\_all.py.
+			.4 normalizer.py.
+			.4 rag\_client.py.
+			.3 rag.
+			.4 context.
+			.5 builder.py.
+			.5 context\_profiles.py.
+			.4 app.py.
+			.4 ioc\_context\_builder.py.
+			.4 ioc\_resolver.py.
+			.4 query\_classifier.py.
+			.3 main.py.
+			.3 README.md.
+			.3 requirements.txt.
+		}
+	\end{tcolorbox}
+	\caption{Estructura de directorios del proyecto}
+	\label{fig:tree}
+\end{figure}
 \subsection{Workflow del sistema}
-   % En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \textit{OpenWebUI} y \textit{Pipelines}, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
+   En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \textit{OpenWebUI} y \textit{Pipelines}, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
 
-    %Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la figura%~\ref{fig:despliegue} ($I$ y $II$)
-\subsubsection{Partes del sistema ...}
+    Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la figura%~\ref{fig:despliegue} ($I$ y $II$).
+    
+  Finalmente, en la Figura~\ref{fig:tree} se detalla dentro del propio \texttt{Nodo IA}, la distribución de los directorios y los ficheros desarrollados para llevar a cabo el proyecto. Como se observa en la disposición jerárquica de la ilustración, se separan las funciones, por ejemplo, los despliegues de \textit{Docker} se centralizan en un fichero \texttt{docker-compose.yml} en el directorio \texttt{chat-feats}, los modelos de IA para definir en Ollama se guardan en el directorio \texttt{modelos\_ia}, los pipelines tienen su propio directorio \texttt{openwebui\_pipelines}, sincronizado con el directorio de pipelines de dentro del contenedor, y todos los scripts de \textit{Python} se alojan en el directorio \texttt{python-scripts}, separando el módulo de ingestión de datos en \texttt{opencti}, el motor de RAG en \texttt{rag}, y finalmente, el programa principal que pone en marcha el motor, \texttt{main.py}.
+\subsubsection{Consumo y vectorización de OpenCTI}
+\subsubsubsection{Ingestor}
+El cometido de este módulo es conectarse con el SDK
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -511,21 +593,42 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
     \caption{Diagrama de Gantt}
     \label{fig:gantt}
 \end{figure}
+\begin{table}
+	\centering
+	\begin{tabular}{l r}
+		\hline
+		\textbf{Tarea} & \textbf{Horas } \\
+		\hline
+		 Estudio de montajes de IA locales &  10 \\
+		  \hline
+		 Estudio requisitos e implementación de infraestructura &  10 \\
+		  \hline
+		 Puesta en marcha interfaz web de chat & 20  \\
+		  \hline
+		 Desarrollo ingestador e ingesta de datos &  25 \\
+		  \hline
+		 Desarrollo backend y motor RAG &  55 \\
+		  \hline
+		 Integración interfaz, modelo y backend & 70  \\
+		  \hline
+		 Estudio de segundo modelo &  5 \\
+		  \hline
+		 Implementación segundo modelo & 5  \\
+		  \hline
+		 Comparativas y pruebas &  25 \\
+		  \hline
+		 Desarrollo memoria &   \\
+		  \hline
+		 Total &  225 \\
+		 \hline
+	\end{tabular}
+	\caption{Tabla de tareas y tiempos}
+	\label{tab:tiempos}
+\end{table}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliografía}
 \printbibliography[title={Bibliografía}]
 
 
-
-
-
-
-
-
-
-
-
-
-%% Sección de transferencia
 \end{document}
