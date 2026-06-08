@@ -1,0 +1,60 @@
+# Threat Actor
+
+THREAT_ACTOR: <nombre_del_actor>
+Descripción: <descripción_del_actor>
+
+TTPs usados:
+- <TTP_1> (<ID_MITRE_1>)
+- <TTP_2> (<ID_MITRE_2>)
+- <TTP_N> (<ID_MITRE_N>)
+
+Malware asociado:
+- <malware_1>
+- <malware_2>
+- <malware_N>
+
+Creado: <fecha_de_creación>
+
+
+# Malware
+
+MALWARE: <nombre_del_malware>
+Tipos: <tipo_1>, <tipo_2>, <tipo_N>
+Descripción: <descripción_del_malware>
+
+TTPs usados:
+- <TTP_1> (<ID_MITRE_1>)
+- <TTP_2> (<ID_MITRE_2>)
+- <TTP_N> (<ID_MITRE_N>)
+
+Creado: <fecha_de_creación>
+
+
+# Attack Pattern / TTP
+
+TTP: <nombre_de_la_técnica>
+ID_MITRE: <identificador_MITRE>
+Descripción: <descripción_de_la_técnica>
+
+Usado por:
+- <actor_1>
+- <actor_2>
+- <actor_N>
+
+Creado: <fecha_de_creación>
+
+
+# Indicator / IOC
+
+INDICATOR (IOC)
+Patrón: <patrón_del_indicador>
+Tipo: <tipo_de_patrón>
+Creado: <fecha_de_creación>
+Válido desde: <fecha_de_inicio_de_validez>
+
+
+# Report
+
+REPORT: <nombre_del_report>
+Descripción: <descripción_del_report>
+Creado: <fecha_de_creación>

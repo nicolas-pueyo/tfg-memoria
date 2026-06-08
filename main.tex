@@ -18,8 +18,9 @@
 ]{biblatex}
 \usepackage{microtype}
 \usepackage{listings}
+\usepackage{listingsutf8}
 \lstdefinestyle{ascii-tree}{
-	escapeinside={&*}{*&}, % <--- AÑADE ESTA LÍNEA
+	escapeinside={&*}{*&},
 	literate=
 	{├}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}\raisebox{0.5ex}{\rule{1ex}{1pt}}}}1 
 	{─}{{\raisebox{0.5ex}{\rule{1.5ex}{1pt}}}}1 
@@ -52,13 +53,42 @@
 	{\normalfont\normalsize\bfseries}} % Estilo de fuente (negrita, tamaño normal)
 \makeatother
 
+
+
+%%%%% DEFINICIÓN DE ESTILOS PARA LISTINGS
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+	backgroundcolor=\color{backcolour},   
+	commentstyle=\color{codegreen},
+	keywordstyle=\color{magenta},
+	numberstyle=\tiny\color{codegray},
+	stringstyle=\color{codepurple},
+	basicstyle=\ttfamily\footnotesize,
+	breakatwhitespace=false,         
+	breaklines=true,                 
+	captionpos=b,                    
+	keepspaces=true,                 
+	numbers=left,                    
+	numbersep=5pt,                  
+	showspaces=false,                
+	showstringspaces=false,
+	showtabs=false,                  
+	tabsize=2
+}
+
+\lstset{style=mystyle}
+
 \begin{document}
 
 \pagenumbering{roman}
 \renewcommand{\contentsname}{Índice}
 \renewcommand{\labelitemi}{$\bullet$}
 \renewcommand{\tablename}{Tabla}
-
+\renewcommand{\lstlistingname}{Listado}
 
 \begin{titlepage}
 
@@ -306,7 +336,66 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
     \caption{Diagrama de despliegue con comunicaciones}
     \label{fig:despliegue}
 \end{figure}
-\begin{figure}[]
+
+\subsection{Workflow del sistema}
+   En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \textit{OpenWebUI} y \textit{Pipelines}, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
+
+    Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la figura%~\ref{fig:despliegue} ($I$ y $II$).
+    
+  Finalmente, en la Figura~\ref{fig:tree} se detalla dentro del propio \texttt{Nodo IA}, la distribución de los directorios y los ficheros desarrollados para llevar a cabo el proyecto. Como se observa en la disposición jerárquica de la ilustración, se separan las funciones, por ejemplo, los despliegues de \textit{Docker} se centralizan en un fichero \texttt{docker-compose.yml} en el directorio \texttt{chat-feats}, los modelos de IA para definir en Ollama se guardan en el directorio \texttt{modelos\_ia}, los pipelines tienen su propio directorio \texttt{openwebui\_pipelines}, sincronizado con el directorio de pipelines de dentro del contenedor, y todos los scripts de \textit{Python} se alojan en el directorio \texttt{python-scripts}, separando el módulo de ingestión de datos en \texttt{opencti}, el motor de RAG en \texttt{rag}, y finalmente, el programa principal que pone en marcha el motor, \texttt{main.py}.
+  
+\subsubsection{Consumo y vectorización de OpenCTI}
+\subsubsubsection{Ingestión}
+El cometido de este módulo es conectarse a OpenCTI mediante el SDK (provisto por el paquete oficial \textit{pycti}), configurando los credenciales adecuados (\textit{IP} de \textit{OpenCTI} y clave de la API). El cliente es pesado, y para evitar ser cargado múltiples veces, por ejemplo, por diferentes hilos de ejecución, ralentizando el sistema completo, sigue un patrón \textit{Singleton}.
+
+Para cada tipo de entidad CTI que se cargará (concretamente \textit{threat actors, malware, attack patterns, indicators y reports}), el módulo define qué atributos necesita recuperar. Para todos los tipos de objeto se cargan identificador, nombre, descripción y fecha de creación. Para \textit{Threat Actors} y \textit{Reports}, estos son los únicos campos recuperados. Se recuperan campos adicionales para:
+\begin{itemize}
+	\item \textbf{Malware:} Para este grupo se recupera también el campo \texttt{malware\_types}, que define a qué categorías de malware pertenece (e.g. \textit{ransomware}, \textit{trojan}, \textit{backdoor})
+	\item \textbf{Attack Patterns:} Para este grupo se recupera además el campo \texttt{x\_mitre\_id}, que es el identificador MITRE asociado a una técnica cuando el \textit{Attack Pattern} pertenece al modelo MITRE ATT\&CK\cite{attck}
+	\item \textbf{Indicators:} Se cargan adicionalmente los campos \texttt{pattern\_type} y \texttt{pattern}, que indican la sintaxis en la que está escrito el campo \texttt{pattern}, y la expresión técnica que define el \textit{IoC}. Esto es, el valor y la forma asociado al indicador (por ejemplo, un dominio cuyo valor es \textit{officeonlaine.com}).
+\end{itemize}
+ Así, no se descarga todo el objeto CTI, ya que esto sería un proceso muy largo y pesado, sino sólo los aspectos relevantes para las fases posteriores del procesado.
+
+Los datos se recuperan mediante ingesta paginada, consumiendo todas las páginas devueltas por \textit{OpenCTI} hasta que no quedan más disponibles. Esto se debe a que OpenCTI puede tener del orden de cientos de miles o incluso millones de entidades, por lo que una única llamada a la API no sería suficiente para recuperar todos los datos o, según la configuración de \textit{timeouts}, podría no devolver nada. 
+
+Una vez finalizada la extracción, guarda los datos obtenidos en ficheros \texttt{JSON} independientes. Por ejemplo, \texttt{threat\_actors.json} o \texttt{indicators.json}.  En este caso, se guardan en el directorio \texttt{/opt/data/raw/opencti}. Como referencia, una ejecución de este programa, concretamente el 8 de junio de 2026,  carga 55 \textit{threat actors}, 355 \textit{malwares}, 410 \textit{attack patterns}, 515569 \textit{indicators} y 5924 \textit{reports}.
+
+Todo este proceso lo lleva a cabo el script \texttt{opencti/ingest.py}.
+
+\subsubsubsection{Normalización}
+Este modulo se encarga de la normalización de los datos brutos extraídos de \textit{OpenCTI}. Transforma los objetos recuperados en documentos textuales homogéneos adecuados para su posterior vectorización. Los datos extraídos de \textit{OpenCTI} se almacenan como JSON bruto, por lo que cada objeto recuperado mantiene su estructura original. Esa representación no es la más adecuada para realizar búsquedas semánticas, ya que los modelos de lenguajes trabajan mejor sobre texto descriptivo que sobre JSON complejos. 
+
+Es una capa intermedia entre la ingesta bruta y la generación de \textit{embeddings} para contener, para cada objeto CTI, la información relevante en un formato legible, y más importante, igual para todos los objetos de un mismo tipo para facilitar la búsqueda por parte del LLM al vectorizar el texto. Aunque indicadores y reportes se dejan tal y como están, se incluyen en esta parte la búsqueda de relaciones de cierto tipos de objetos en \textit{OpenCTI} para mejorar la semántica asociada al mismo:
+\begin{itemize}
+	\item \textbf {Threat Actors:} se incluyen relaciones tipo \texttt{uses} para recuperar \textit{Attack Patterns} usados y \textit{Malware} asociado.
+	\item \textbf{Malware:} se incluyen también relaciones tipo \texttt{uses} para recuperar \textit{Attack Patterns} usados.
+	\item \textbf{Attack Patterns: } se incluyen relaciones tipo \texttt{uses} para recuperar \textit{Threat Actors} que usan estos patrones y técnicas.
+\end{itemize}
+
+El resultado final del proceso de normalización son documentos estructurados, uniformes para cada tipo de objeto recuperado de \textit{OpenCTI}. Por razones de procesado y eficiencia, se guardarán en formato \texttt{JSONL} (\textit{JSON Lines}), que almacena un objeto JSON por linea, aunque extrayendo el contenido y dejandolo en un formto humanamente legible, quedaría como los ejemplo en el Listado~\ref{lst:ejemplos}.
+
+Esta parte del proceso es llevada a cabo por los scripts \texttt{normalizer}, que define los procesos de normalización para cada tipo de objeto y \texttt{normalize\_all.py}, que lee los ficheros \texttt{JSON} guardados, procesa la normalización de cada uno de estos ficheros y los guarda en su correspondiente fichero \texttt{JSONL}.
+
+\lstinputlisting[inputencoding=utf8/latin1, breaklines=true,caption=Ejemplos de estructuras normalizadas,label=lst:ejemplos]{ejemplos_normalized}
+
+\subsubsubsection{Generación de \textit{embeddings} e inserción en \textit{ChromaDB}}
+Tras la fase de normalización, los objetos CTI extraídos desde OpenCTI se encuentran representados como documentos textuales semiestructurados. Aunque estos documentos ya son legibles y contienen información relevante sobre actores, malware, técnicas, indicadores e informes, todavía no pueden ser utilizados directamente para realizar búsquedas semánticas. Para ello es necesario transformarlos en representaciones vectoriales, conocidas como \textit{embeddings}, que permiten comparar documentos y consultas en función de su similitud semántica.
+
+El proceso de vectorización consiste en cargar los ficheros \texttt{.jsonl} generados durante la normalización, extraer el campo \texttt{text} de cada documento y convertirlo en un vector numérico mediante el modelo \texttt{sentence-transformers/all-MiniLM-L6-v2}. Este modelo genera una representación densa del significado del texto, de forma que documentos conceptualmente similares quedan próximos dentro del espacio vectorial. En paralelo, también se cargan los ficheros de metadatos asociados a cada colección, comprobando que el número de textos y metadatos coincide antes de generar los embeddings. Esta comprobación es importante para garantizar que cada vector queda asociado al documento y metadatos correctos.
+
+Los embeddings generados se almacenan en ficheros \texttt{.npy}, separados por tipo de entidad. Así, se generan ficheros independientes para \texttt{threat\_actors}, \texttt{malware}, \texttt{attack\_patterns}, \texttt{reports} e \texttt{indicators}. Esta separación permite mantener una organización coherente del corpus CTI y facilita la carga posterior en colecciones diferenciadas dentro de ChromaDB. Además, guardar los embeddings como ficheros NumPy permite reutilizarlos sin necesidad de recalcularlos cada vez que se quiera reconstruir la base vectorial.
+
+Una vez generados los embeddings, el siguiente paso consiste en cargarlos en ChromaDB. Para ello, el script de inserción se conecta al servidor de ChromaDB mediante \texttt{HttpClient}. Para cada tipo de entidad, el script crea o recupera una colección con el mismo nombre de la entidad, por ejemplo \texttt{threat\_actors}, \texttt{malware}, \texttt{attack\_patterns}, \texttt{reports} o \texttt{indicators}. Las colecciones se configuran utilizando similitud coseno, una métrica habitual para comparar embeddings en sistemas de recuperación semántica.
+
+Antes de insertar los documentos en ChromaDB, el script valida que los textos normalizados, los metadatos y los embeddings tengan la misma longitud. Esta validación evita desalineaciones entre documentos, vectores y metadatos. Posteriormente, la inserción se realiza por lotes, asociando a cada documento su identificador, su texto, su embedding y sus metadatos. De este modo, cada entrada almacenada en ChromaDB conserva tanto la representación vectorial necesaria para la búsqueda semántica como la información textual y de trazabilidad necesaria para interpretar el resultado recuperado.
+
+El resultado final de este proceso es una base vectorial organizada en colecciones CTI, donde cada documento procedente de OpenCTI puede ser recuperado por similitud semántica. Durante una consulta, el backend RAG genera un embedding de la pregunta o del indicador detectado y consulta las colecciones de ChromaDB para obtener los documentos más cercanos. Estos documentos se incorporan al contexto final como información contextual o inferida, diferenciándola de la inteligencia explícita recuperada directamente desde OpenCTI.
+
+La vectorización y carga en ChromaDB son, por tanto, una parte esencial del sistema RAG. Esta fase permite complementar la información confirmada de OpenCTI con contexto semántico adicional, como actores, malware, técnicas, informes o indicadores relacionados conceptualmente con la consulta. Sin embargo, la similitud vectorial no implica una relación confirmada entre entidades CTI. Por este motivo, los documentos recuperados desde ChromaDB se tratan como contexto inferido y se separan explícitamente de la información considerada confirmada.
+
+Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la generación de \textit{embeddings}, y \textit{chroma\_load.py}
+
+\begin{figure}[h!]
 	\centering
 	\begin{tcolorbox}[
 		colback=gray!5,                    % Fondo gris suave
@@ -344,7 +433,6 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
 			.3 opencti.
 			.4 chroma\_load.py.
 			.4 client.py.
-			.4 count\_objects.py.
 			.4 embed\_all\_st.py.
 			.4 ingest.py.
 			.4 normalize\_all.py.
@@ -366,15 +454,14 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
 	\caption{Estructura de directorios del proyecto}
 	\label{fig:tree}
 \end{figure}
-\subsection{Workflow del sistema}
-   En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \textit{OpenWebUI} y \textit{Pipelines}, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
 
-    Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la figura%~\ref{fig:despliegue} ($I$ y $II$).
-    
-  Finalmente, en la Figura~\ref{fig:tree} se detalla dentro del propio \texttt{Nodo IA}, la distribución de los directorios y los ficheros desarrollados para llevar a cabo el proyecto. Como se observa en la disposición jerárquica de la ilustración, se separan las funciones, por ejemplo, los despliegues de \textit{Docker} se centralizan en un fichero \texttt{docker-compose.yml} en el directorio \texttt{chat-feats}, los modelos de IA para definir en Ollama se guardan en el directorio \texttt{modelos\_ia}, los pipelines tienen su propio directorio \texttt{openwebui\_pipelines}, sincronizado con el directorio de pipelines de dentro del contenedor, y todos los scripts de \textit{Python} se alojan en el directorio \texttt{python-scripts}, separando el módulo de ingestión de datos en \texttt{opencti}, el motor de RAG en \texttt{rag}, y finalmente, el programa principal que pone en marcha el motor, \texttt{main.py}.
-\subsubsection{Consumo y vectorización de OpenCTI}
-\subsubsubsection{Ingestor}
-El cometido de este módulo es conectarse con el SDK
+\subsubsection{Frontend, backend y motor de RAG}
+\subsubsubsection{OpenWebUI}
+
+\subsubsubsection{Servidor \textit{Pipelines}}
+
+\subsubsubsection{Backend y motor RAG}
+% Explicar los diferentes modos de contexto, bla bla bla
 
 \newpage
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -593,7 +680,7 @@ El cometido de este módulo es conectarse con el SDK
     \caption{Diagrama de Gantt}
     \label{fig:gantt}
 \end{figure}
-\begin{table}
+\begin{table}[H]
 	\centering
 	\begin{tabular}{l r}
 		\hline
@@ -625,6 +712,19 @@ El cometido de este módulo es conectarse con el SDK
 	\caption{Tabla de tareas y tiempos}
 	\label{tab:tiempos}
 \end{table}
+
+\addcontentsline{toc}{subsection}{Anexo B. Ficheros desarrollados.}
+\subsection*{Anexo B. Ficheros desarrollados.}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=ingest.py,label=lst:ingest]{python/ingest.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=normalizer.py,label=lst:normalizer]{python/normalizer.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=normalize\_all.py,label=lst:normalizeall]{python/normalize_all.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=embed\_all\_st.py,label=lst:embedall]{python/embed_all_st.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=chroma\_load.py,label=lst:chromaload]{python/chroma_load.py}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliografía}
