@@ -1,0 +1,610 @@
+En los ´ultimos a˜nos, la adopci´on de tecnolog´ıas basadas en Inteligencia Artificial (IA)
+se ha consolidado como una pr´actica habitual en el entorno corporativo para optimizar
+procesos y mejorar la productividad de los empleados. En particular, los Modelos de
+Lenguaje de Gran Escala (LLM) han demostrado ser herramientas de utilidad para
+tareas como la s´ıntesis de informaci´on y la redacci´on de informes t´ecnicos. No obstante,
+este r´apido despliegue tecnol´ogico tambi´en introduce retos de seguridad significativos.
+La falta de formaci´on espec´ıfica en ciberseguridad de muchos usuarios puede dar lugar
+a malas pr´acticas en el manejo de la IA, como la exposici´on accidental de datos
+corporativos sensibles al enviarlos a APIs comerciales externas.
+De forma paralela, la defensa frente a incidentes digitales se apoya cada vez m´as en la
+Ciberinteligencia de Amenazas (CTI, por sus siglas en ingl´es), la cual permite estructurar
+y correlacionar datos sobre potenciales ataques mediante herramientas de c´odigo abierto
+como OpenCTI. Sin embargo, la gesti´on diaria de estos repositorios de conocimiento
+sigue requiriendo una considerable inversi´on de tiempo por parte de los analistas para
+procesar e interpretar la informaci´on t´ecnica de los nuevos Indicadores de Compromiso
+(IoC).
+En este escenario, surge la oportunidad de integrar la IA generativa como un asistente
+para facilitar la labor de los analistas en la interpretaci´on y an´alisis de CTI. Para llevar
+a cabo esta integraci´on en un contexto empresarial de manera segura, es necesario
+descartar las soluciones basadas en la nube y optar por modelos locales y privados.
+De este modo, este proyecto propone el desarrollo de una herramienta desplegada
+en un servidor privado que, mediante modelos de lenguaje especializados ejecutados
+localmente, permita a los ingenieros de ciberseguridad consultar, comparar y contrastar
+la ciberinteligencia de la organizaci´on con nuevos indicadores en un tiempo razonable,
+garantizando la soberan´ıa de los datos sensibles de la empresa.
+El presente proyecto se ha desarrollado en el marco de colaboraci´on con la divisi´on de
+Zaragoza de Inetum Espa˜na S.A., multinacional especializada en consultor´ıa tecnol´ogica
+y provisi´on de servicios de TI. En Arag´on, Inetum desempe˜na un papel relevante al
+gestionar las infraestructuras y los servicios inform´aticos de entidades p´ublicas de gran
+envergadura, como la Diputaci´on General de Arag´on (DGA) y el Servicio de Salud
+Aragon´es (SALUD). En este contexto empresarial, la infraestructura asignada para
+el despliegue de la soluci´on consta de entornos de virtualizaci´on Linux (RedHat 10),
+sin entorno de escritorio, sobre hardware de centro de datos basados ´unicamente en
+capacidad de procesamiento (CPU) y memoria RAM, prescindiendo por completo
+de aceleraci´on gr´afica por GPU. Adem´as, con el fin de garantizar la soberan´ıa, la
+transparencia y la viabilidad de la arquitectura propuesta, el sistema se implementar´a
+de manera ´ıntegra utilizando herramientas y soluciones de software de c´odigo abierto
+
+El objetivo general de este proyecto es dise˜nar, implementar y evaluar una plataforma
+privada y local de asistencia conversacional orientada a la ingenier´ıa de ciberseguridad,
+integrada con una plataforma de gesti´on de ciberinteligencia de amenazas (CTI). El
+1
+sistema propuesto debe permitir la consulta interactiva y el an´alisis contextualizado
+de Indicadores de Compromiso (IoC) garantizando la soberan´ıa de los datos sensibles
+y optimizando el rendimiento de modelos de lenguaje bajo restricciones estrictas de
+hardware basadas exclusivamente en procesamiento por CPU y memoria RAM.
+Para alcanzar este fin, se proponen los siguientes objetivos espec´ıficos:
+• Despliegue y configuraci´on de un entorno local aislado: Implementar una
+infraestructura privada que albergue un entorno de ejecuci´on para modelos de
+lenguaje y una interfaz gr´afica de usuario accesible para los analistas, operando
+de manera local y sin dependencias de servicios externos en la nube.
+• Desarrollo de un pipeline de recuperaci´on sem´antica: Dise˜nar un me-
+canismo de indexaci´on, almacenamiento vectorial y recuperaci´on sem´antica de
+datos que permita alimentar las consultas del asistente conversacional con la
+ciberinteligencia y el contexto hist´orico de la organizaci´on de forma precisa.
+• Integraci´on y consulta bidireccional con sistemas de ciberinteligencia:
+Establecer una conexi´on con la API de la plataforma de ciberinteligencia del
+cliente para permitir que el asistente interact´ue con el grafo de conocimiento
+existente, traduciendo consultas en lenguaje natural a b´usquedas estructuradas
+de observables y amenazas.
+• Evaluaci´on comparativa de modelos de lenguaje especializados: Evaluar
+el rendimiento, el nivel de detalle t´ecnico, la tasa de alucinaciones y la precisi´on
+de m´ultiples modelos de lenguaje de diferentes escalas de par´ametros en tareas
+complejas de correlaci´on y an´alisis de indicadores.
+
+El presente documento se estructura en diferentes secciones con subsecciones. En la
+segunda secci´on se explican los conocimientos te´oricos previos a tener en cuenta sobre
+diferentes conceptos clave para entender el desarrollo del proyecto. En la tercera secci´on
+se detalla cu´al es la arquitectura del proyecto, qu´e componentes se han utilizado, qu´e
+tecnolog´ıas se han usado para desarrollar o desplegar cada uno de estos componentes, as´ı
+como qu´e organizaci´on tienen y c´omo se despliegan f´ısicamente cada uno, y finalmente
+explica el workflow general del sistema, es decir, c´omo cumple cada componente su
+cometido. En la cuarta secci´on se detallan las pruebas que se han realizado al sistema,
+se recogen y presentan los resultados obtenidos y se realiza un an´alisis de los mismos.
+Finalmente, en la ´ultima secci´on, la quinta, se analiza todo el contexto y trabajo desa-
+rrollado para extraer unas conclusiones, y se reflexiona sobre qu´e otras funcionalidades
+se podr´ıan a˜nadir al proyecto en caso de continuar con el desarrollo.
+
+En el ´ambito de la ciberseguridad corporativa, la Respuesta a Incidentes (IR, por
+sus siglas en ingl´es de Incident Response) constituye la metodolog´ıa estructurada y
+sistem´atica que adopta una organizaci´on para la detecci´on, contenci´on, mitigaci´on
+y recuperaci´on frente a incidentes de seguridad y ciberataques. De acuerdo con los
+est´andares de la industria, el objetivo primordial de la respuesta a incidentes abarca
+tanto la prevenci´on proactiva de ciberataques antes de que estos lleguen a materializarse,
+como la minimizaci´on del impacto financiero, el da˜no reputacional y la interrupci´on de
+los procesos de negocio en caso de que una intrusi´on se complete de manera exitosa.
+Para operativizar esta estrategia, las organizaciones definen sus tecnolog´ıas, responsabi-
+lidades y procedimientos dentro de un Plan de Respuesta a Incidentes (IRP, Incident
+Response Plan). Este plan act´ua como el componente t´ecnico de la gesti´on integral de
+incidentes, especificando c´omo deben identificarse, aislarse y resolverse los diferentes
+vectores de ataque de forma coordinada. En la actualidad, la integraci´on de soluciones
+de ciberseguridad asistidas por inteligencia artificial permite acelerar este proceso dr´asti-
+camente, ayudando a los analistas a predecir posibles canales de ataque, automatizar
+la clasificaci´on de alertas y correlacionar comportamientos sospechosos antes de que
+escalen a incidentes cr´ıticos.
+Para el estudio del estado de la ciberinteligencia en el marco de la respuesta a inci-
+dentes, los analistas dependen de los Indicadores de Compromiso (IoCs, Indicators of
+Compromise). En el campo de la inform´atica forense y el an´alisis de malware, un IoC se
+define como cualquier artefacto, registro o evidencia digital identificado en un sistema
+operativo, un dispositivo de red o un flujo de tr´afico que permite constatar, con un
+determinado nivel de confianza, la presencia de una actividad maliciosa o el compromiso
+de un activo.
+En el marco del est´andar internacional STIX 2.1, la arquitectura de datos sobre la
+que se fundamenta la plataforma OpenCTI utilizada en este proyecto, es imperativo
+establecer una distinci´on t´ecnica entre un Observable (SCO, STIX Cyber Observable) y
+un Indicador (SDO, STIX Domain Object):
+• Observable (SCO): Representa un dato t´ecnico en bruto desprovisto de in-
+tencionalidad o valoraci´on ´etica. Una direcci´on IP, un dominio o el hash de un
+binario son observables que pueden pertenecer tanto a servicios leg´ıtimos de la
+infraestructura como a servidores del atacante.
+• Indicador (SDO): Es la entidad que aporta contexto sem´antico y de seguridad al
+observable. Un indicador asocia un patr´on de b´usqueda (definido bajo est´andares
+como STIX Pattern, reglas YARA o firmas Sigma) a un observable espec´ıfico,
+determinando un per´ıodo de validez temporal, relaciones con campa˜nas de actores
+de amenazas y un nivel de certeza t´ecnica de maliciosidad.
+Para el alcance del sistema desarrollado en este proyecto, se considerar´an y analizar´an
+los siguientes tipos de observables e indicadores de compromiso t´ecnicos:
+• URLs identificadas como maliciosas, habitualmente vinculadas a servidores
+de descarga de cargas ´utiles (payloads), portales de suplantaci´on de identidad
+(phishing) o paneles de control de botnets.
+• Hashes de ficheros identificados como c´odigos da˜ninos. El uso de funciones de
+dispersi´on criptogr´afica permite identificar un´ıvocamente muestras de malware
+sin necesidad de procesar el archivo completo. Para este proyecto se contemplan:
+• SHA256 (64 caracteres hexadecimales), est´andar actual por su resistencia a
+colisiones.
+• SHA1 (40 caracteres hexadecimales), de uso remanente en bases de datos
+hist´oricas.
+• MD5 (32 caracteres hexadecimales), obsoleto criptogr´aficamente pero com´un
+en la categorizaci´on r´apida de amenazas.
+• Direcciones IPv4 identificadas como maliciosas, asociadas com´unmente a infra-
+estructura de Comando y Control (C2), nodos de salida Tor o proxies utilizados
+para el escaneo de vulnerabilidades.
+• Dominios web identificados como maliciosos, utilizados para enmascarar direc-
+ciones IP de infraestructura atacante mediante t´ecnicas de resoluci´on din´amica de
+nombres.
+A nivel estrat´egico, la utilidad de estos IoCs se rige bajo la Pir´amide del Dolor de
+David Bianco[1]. Este modelo conceptual organiza los indicadores de amenazas seg´un el
+grado de dificultad (o ”dolor”) que causa al atacante el hecho de que un defensor los
+detecte y bloquee:
+1. Base (Hashes, IPs y Dominios): Constituyen el nivel m´as bajo. Son extrema-
+damente sencillos y baratos de modificar para el adversario. Un atacante puede
+alterar un solo byte de su c´odigo para cambiar el hash criptogr´afico del malware,
+o rotar de direcci´on IP en segundos mediante servicios de red din´amica, eludiendo
+bloqueos automatizados est´aticos.
+2. Medio (Artefactos de red y de host): Requiere que el atacante modifique los
+patrones de comunicaci´on de sus herramientas o las trazas que estas dejan en los
+registros de los sistemas comprometidos.
+3. C´uspide (Herramientas y TTPs): Las T´acticas, T´ecnicas y Procedimientos
+(TTPs) definen el comportamiento operativo real y los h´abitos del atacante.
+Obligar a un atacante a cambiar sus TTPs es el logro de mayor valor defensivo,
+ya que le exige reestructurar por completo su metodolog´ıa y reaprender t´acticas
+de infiltraci´on.
+La integraci´on de la Inteligencia Artificial propuesta en este trabajo encuentra su
+motivaci´on en esta jerarqu´ıa. Mientras que los sistemas autom´aticos de seguridad
+tradicionales (como cortafuegos o antivirus) son excelentes procesando de manera
+r´ıgida los observables de la base (hashes e IPs), carecen de la capacidad cognitiva para
+relacionar estos datos con comportamientos complejos. La incorporaci´on de un modelo
+de lenguaje de gran escala (LLM) permite a los ingenieros de ciberseguridad procesar
+el texto no estructurado y los grafos de conocimiento de OpenCTI para correlacionar
+observables simples con el comportamiento general de la amenaza en la c´uspide de la
+pir´amide, forzando un impacto real sobre el coste operativo del atacante.
+
+La Ciberinteligencia de Amenazas (CTI, por sus siglas en ingl´es de Cyber Threat
+Intelligence) consiste en la recopilaci´on, an´alisis y estructuraci´on de informaci´on sobre
+amenazas activas o potenciales con el fin de anticipar, detectar y mitigar ataques de
+forma proactiva. Esta disciplina permite a los equipos de seguridad comprender el
+contexto, las motivaciones y las metodolog´ıas de los adversarios, optimizando la toma
+de decisiones estrat´egicas y los tiempos de respuesta ante incidentes.
+Para centralizar y procesar este conocimiento, las organizaciones emplean plataformas
+especializadas (TIP, Threat Intelligence Platforms) como OpenCTI, una herramienta de
+c´odigo abierto dise˜nada para estructurar, almacenar, organizar y visualizar informaci´on
+t´ecnica y no t´ecnica sobre ciberamenazas. El n´ucleo de OpenCTI se fundamenta en un
+grafo de conocimiento basado en el est´andar internacional STIX 2.1. En esta arquitectura,
+la inteligencia se modela mediante dos elementos[2]:
+• Nodos (Entidades): Representan conceptos de alto nivel, conocidos como objetos
+de dominio o STIX Domain Objects (SDO), tales como Malware, Actores de
+Amenazas o Vulnerabilidades.
+• Aristas (Relaciones): Modelan las conexiones l´ogicas entre las entidades y se
+asocian a observables t´ecnicos o STIX Cyber Observables (SCO), como direcciones
+IP, dominios o hashes de archivos, que sirven de evidencia de la actividad.
+
+Los Modelos de Lenguaje de Gran Escala (LLM, por sus siglas en ingl´es) son sistemas
+basados en redes neuronales profundas dise˜nados para comprender, procesar y generar
+lenguaje natural. Formalmente, un LLM se define como una funci´on matem´atica
+compleja cuya entrada y salida consisten en listas de n´umeros enteros[3]. Para que el
+modelo pueda procesar el texto en lenguaje humano, este debe someterse a un proceso
+de tokenizaci´on, en el cual se divide el flujo de caracteres en unidades discretas menores
+llamadas tokens (que pueden ser palabras, subpalabras o caracteres individuales)[4].
+Este proceso mapea el texto a valores enteros dentro de un rango determinado por el
+tama˜no de su vocabulario [0, V − 1], donde V representa la dimensi´on del vocabulario
+del modelo[3].
+En el contexto corporativo, la adopci´on de estos modelos se divide principalmente entre
+servicios de infraestructura gestionada en la nube y despliegues locales. Si bien el uso
+de APIs comerciales en plataformas en la nube (como las soluciones de infraestructura
+de AWS) proporciona una gran capacidad de c´omputo y escalabilidad, la transferencia
+de datos de seguridad hacia servidores externos introduce riesgos severos de exposici´on,
+fugas de informaci´on y fallas de cumplimiento normativo. Por esta raz´on, el estado
+del arte en ciberseguridad se orienta firmemente hacia el despliegue local de modelos
+de pesos abiertos de menor tama˜no, garantizando la soberan´ıa absoluta de los datos
+sensibles de la organizaci´on[5].
+
+Mientras que un LLM representa la estructura est´atica de la red neuronal y sus pesos
+matem´aticos almacenados en disco, el motor de inferencia es el software de ejecuci´on
+(runtime) activo que carga dichos pesos en memoria y realiza las operaciones algebraicas
+necesarias para responder a las consultas del usuario. En un servidor privado que carece
+de aceleradores gr´aficos (GPU), el motor de inferencia debe ejecutar el modelo utilizando
+exclusivamente el procesador (vCPU en contextos de centros de datos) y la memoria
+RAM del sistema.
+En este escenario de inferencia puramente basado en CPU, la velocidad del sistema se
+ve fuertemente limitada. El cuello de botella principal no radica en la capacidad de
+c´omputo de la vCPU, sino en el ancho de banda f´ısico de la memoria RAM, puesto que el
+procesador debe leer la totalidad de los par´ametros del modelo para generar cada token
+individual. Mientras que las GPUs utilizan memoria especializada de gran velocidad
+con un ancho de banda de entre 600 y 1500 GB/s, la memoria RAM convencional de
+un servidor host suele transferir datos a velocidades de entre 50 y 200 GB/s.
+Esta limitaci´on f´ısica provoca que la asignaci´on de hilos de ejecuci´on en el motor de
+inferencia no escale de manera lineal con el n´umero de n´ucleos virtuales (vCPUs)
+asignados. Si se configuran demasiados hilos de ejecuci´on concurrentes en el motor de
+inferencia para procesar un modelo pesado, los hilos terminar´an compitiendo por los
+mismos canales f´ısicos de acceso a la memoria RAM. Esta contenci´on de memoria genera
+un cuello de botella t´ecnico que degrada dr´asticamente el rendimiento del sistema y
+reduce la tasa de generaci´on de texto (tokens por segundo), por lo que la optimizaci´on
+de estos sistemas requiere limitar de forma expl´ıcita el n´umero de hilos de ejecuci´on a
+un valor cercano al n´umero de n´ucleos f´ısicos del procesador.
+
+>La Generaci´on Aumentada por Recuperaci´on (RAG, por sus siglas en ingl´es de Retrieval-
+Augmented Generation) es una t´ecnica que optimiza el comportamiento de un modelo
+de lenguaje al complementar sus instrucciones (prompts) de entrada con informaci´on
+externa relevante sin necesidad de modificar f´ısicamente los par´ametros del modelo[4].
+El flujo operativo de RAG consta de tres etapas l´ogicas:
+1. Recuperaci´on: Ante una consulta del analista, el sistema busca de manera
+autom´atica los fragmentos de documentos o informes t´ecnicos m´as relevantes
+dentro de una base de datos.
+2. Aumentaci´on: El sistema a˜nade estos fragmentos recuperados al prompt original
+del usuario en forma de contexto informativo ver´ıdico.
+3. Generaci´on: El LLM procesa la consulta enriquecida y genera una respuesta
+redactada en lenguaje natural que se fundamenta estrictamente en la evidencia
+proporcionada, reduciendo de manera dr´astica las alucinaciones del sistema[4].
+Para dar soporte y agilizar la etapa de recuperaci´on en tiempo real, se emplean las
+bases de datos vectoriales (como ChromaDB o Qdrant), las cuales almacenan los textos
+de ciberinteligencia previamente convertidos en vectores num´ericos o embeddings que
+capturan su significado sem´antico. De este modo, la base de datos es capaz de localizar
+de forma matem´atica los fragmentos de informaci´on m´as pertinentes seg´un la intenci´on
+de la consulta del analista, inyect´andolos instant´aneamente en el contexto de la IA[3].
+
+Tomando como punto de partida la infraestructura tecnol´ogica preexistente de la
+organizaci´on, la cual dispone de una instancia de OpenCTI desplegada de manera
+independiente en un nodo dedicado de la red corporativa, el desarrollo pr´actico de este
+trabajo se centra en dise˜nar e implementar una pasarela de comunicaci´on bidireccional
+y segura con dicha base de conocimiento.
+Con el prop´osito de estructurar de forma modular el asistente inteligente, cuya finalidad
+es procesar y correlacionar informaci´on de seguridad dentro del per´ımetro de la empresa,
+la arquitectura del sistema propuesto se articula en torno a los siguientes componentes:
+• Motor de inferencia local y selecci´on de modelos: Para la ejecuci´on de los
+modelos de lenguaje de gran escala bajo un entorno local, se evaluaron diversas
+alternativas de motores de inferencia, entre las que destacaron Ollama y vLLM.
+Si bien vLLM ofrece un rendimiento excepcional en la gesti´on de solicitudes
+concurrentes gracias al algoritmo de optimizaci´on de memoria PagedAttention [6],
+su arquitectura est´a dise˜nada de manera prioritaria para operar bajo aceleraci´on
+por hardware gr´afico (GPU). Debido a la restricci´on de infraestructura impuesta
+en este proyecto, consistente en operar exclusivamente sobre procesamiento por
+CPU, se seleccion´o Ollama como el motor de inferencia local principal. Ollama,
+desarrollado sobre la biblioteca nativa en C/C++ llama.cpp, proporciona una
+capa de abstracci´on eficiente para entornos virtualizados, facilidad de configura-
+ci´on multimodelo mediante archivos de instrucci´on (Modelfiles) y una API local
+compatible con los est´andares de la industria.
+Para posibilitar la interacci´on con el motor, los modelos de lenguaje se cargan
+en su versi´on cuantizada utilizando archivos de extensi´on .gguf. En cuanto a los
+modelos de lenguaje seleccionados, se descartaron las opciones generalistas en favor
+de modelos especializados en ciberseguridad mediante ajuste fino (fine-tuning).
+Esta especializaci´on garantiza que la IA sea capaz de interpretar terminolog´ıa
+t´ecnica de ciberinteligencia, correlacionar observables y procesar de manera segura
+datos potencialmente ofensivos (como volcados de registros o firmas de malware)
+sin sufrir de bloqueos por pol´ıticas de seguridad corporativas comerciales. Con el
+fin de realizar una evaluaci´on comparativa bajo los recursos asignados al servidor,
+se seleccionaron dos modelos especializados de escalas de par´ametros diferenciadas:
+• Lily-Cybersecurity-7B-v0.2: Modelo ligero desarrollado por Sego Lily
+Labs, ajustado sobre la arquitectura de Mistral-7B-Instruct-v0.2 a partir
+de un conjunto de 22,000 instrucciones de seguridad manuales [7]. En su
+cuantizaci´on a 4 bits, presenta un peso de archivo de aproximadamente 4.37
+GB, lo que permite una inferencia ´agil y fluida con un consumo m´ınimo de
+memoria RAM.
+• CyberOSS-2.0-20B (CyberPal-2.0-20B): Modelo avanzado de la suite de
+seguridad de c´odigo abierto CyberPal 2.0, ajustado sobre la arquitectura gpt-
+oss-20b mediante el pipeline de enriquecimiento y trazado de razonamiento
+t´ecnico SecKnowledge 2.0 [8]. En su cuantizaci´on de 4 bits (Q4 K M), el
+tama˜no del archivo asciende a 15.8 GB, demandando un mayor esfuerzo
+de lectura por parte de la memoria RAM del servidor, pero aportando un
+an´alisis conceptual de nivel experto.
+La elecci´on de esta pareja de modelos permite someter la herramienta a una vali-
+daci´on pr´actica frente a los benchmarks de referencia de la literatura cient´ıfica. De
+acuerdo con el estudio de evaluaci´on integral publicado en ”Toward Cybersecurity-
+Expert Small Language Models”(arXiv:2510.14113) [8], Lily-Cybersecurity-7B-
+v0.2 obtiene una puntuaci´on promedio de 53.38 % en la resoluci´on de tareas
+complejas de seguridad y ciberinteligencia, mientras que CyberPal-2.0-20B alcan-
+za una puntuaci´on de 80.33 % en el mismo conjunto de pruebas (CTI-Bench),
+superando incluso a modelos comerciales cerrados en la correlaci´on de vulnerabili-
+dades e identificaci´on de t´acticas.
+• Interfaz gr´afica de usuario y orquestaci´on de flujos (Open WebUI):
+Para proporcionar a los analistas de ciberseguridad un entorno visual, accesi-
+ble e interactivo, se evaluaron diversas plataformas autohospedadas capaces de
+desplegarse mediante contenedores Docker y configurarse de manera sencilla a
+trav´es de par´ametros de entorno. En una primera fase de dise˜no, se contempl´o
+la implementaci´on de la interfaz ChatUI desarrollada por Hugging Face. Sin
+embargo, este entorno fue descartado debido a incompatibilidades severas en su
+integraci´on nativa con el motor de inferencia local Ollama. Durante las pruebas de
+concepto, la ambig¨uedad en la documentaci´on oficial respecto a su interconexi´on
+local propici´o fallos cr´ıticos en el control del estado, tales como la imposibilidad
+de mapear y listar din´amicamente los modelos de Ollama, y respuestas de los
+modelos no mostradas en la interfaz.
+Para solucionar estos inconvenientes, se seleccion´o la plataforma Open WebUI.
+Esta herramienta destaca por su compatibilidad nativa e inmediata con la API
+de Ollama, configuraci´on de par´ametros tanto de forma declarativa (en la con-
+figuraci´on de Docker) como en caliente desde su panel de administraci´on web
+[9]. Un factor tecnol´ogico determinante para su elecci´on fue la disponibilidad de
+su arquitectura desacoplada de flujos de trabajo, denominada Pipelines. Este
+servidor sat´elite programado en Python act´ua como un middleware capaz de
+interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje [10].
+Esta capacidad resulta cr´ıtica para el alcance de este proyecto, ya que proporciona
+el punto de anclaje necesario para inyectar l´ogica personalizada, realizar llamadas
+a servicios externos y canalizar las b´usquedas de ciberinteligencia dentro de la
+base de datos vectorial de forma transparente para el analista, facilitando as´ı la
+integraci´on del sistema RAG.
+• Backend, motor de RAG y pipelines: Este bloque representa el n´ucleo
+diferencial y el valor de desarrollo propio de este proyecto. Mientras que los
+componentes analizados hasta ahora se basan en el despliegue, parametrizaci´on y
+organizaci´on arquitect´onica de im´agenes de Docker (como Open WebUI o la base
+de datos vectorial), es en esta capa donde se introduce la l´ogica personalizada
+que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad.
+Aunque se describen como componentes diferenciados, el servidor de pipelines,
+el backend de servicios y el motor de RAG operan como un ´unico subsistema
+l´ogicamente acoplado debido a su constante cooperaci´on en tiempo real.
+El flujo de procesamiento de la informaci´on se inicia cuando el analista realiza
+una consulta en la interfaz gr´afica que menciona un indicador de compromiso
+(IoC), momento en el cual la solicitud es interceptada de manera inmediata por
+el servidor de middleware Pipelines. En lugar de transmitir la petici´on de forma
+directa al motor de inferencia local, el pipeline extrae el payload y desv´ıa la
+solicitud hacia un endpoint espec´ıfico de nuestro backend. Al recibir este paquete,
+el backend analiza la petici´on y llama a las funciones del motor de RAG, el cual
+recupera contexto t´ecnico sobre el indicador consultando de manera estructurada
+tanto la API de OpenCTI como la base de datos vectorial local (ChromaDB).
+Una vez obtenido este contexto hist´orico y relacional, se devuelve en forma de
+respuesta al pipeline, encargado de reformular el prompt del usuario inyectando la
+informaci´on recuperada y de transmitir la instrucci´on final enriquecida al modelo
+correspondiente para que este realice su razonamiento.
+Para la construcci´on del backend de servicios se seleccion´o el marco de trabajo
+(framework ) FastAPI. Esta elecci´on se fundamenta principalmente en su sencillez y
+en que permite un desarrollo de endpoints de manera r´apida y eficiente, facilitando
+un acoplamiento ´agil con el resto de componentes escritos en Python. Asimismo,
+FastAPI destaca por su capacidad para gestionar de manera ´optima la asincron´ıa
+de forma nativa a trav´es del servidor web de aplicaciones de bajo nivel Uvicorn,
+encargado de procesar la especificaci´on ASGI de manera eficiente. Como un
+a˜nadido a esta infraestructura, FastAPI utiliza internamente Starlette para dar
+soporte a la asincron´ıa y se integra de forma directa con Pydantic para la validaci´on
+declarativa de datos mediante anotaciones de tipo, lo que garantiza la integridad
+de los payloads intercambiados sin penalizar la velocidad de desarrollo.
+• Motor de base de datos vectorial (ChromaDB): La incorporaci´on de este
+componente responde a la necesidad de complementar la informaci´on relacional y
+estructurada obtenida de la API de OpenCTI con capacidades de recuperaci´on
+sem´antica profunda. Mediante el uso de un modelo local de generaci´on de vectores
+(embeddings), el sistema procesa, fragmenta e indexa tanto los informes t´ecnicos
+de amenazas como los metadatos de los observables extra´ıdos de la plataforma
+de ciberinteligencia. De este modo, ante una consulta del analista, la base de
+datos permite ejecutar b´usquedas de similitud para deducir inferencias latentes
+y proporcionar un contexto complementario de alto valor que no se encuentra
+expl´ıcitamente enlazado en el grafo de conocimiento original.
+Para la implementaci´on de este almac´en de vectores se seleccion´o ChromaDB.
+En primer lugar, se define como una base de datos vectorial de c´odigo abierto
+altamente ligera y optimizada para despliegues locales (on-premise), lo que evita
+introducir una sobrecarga de infraestructura compleja o costosa en el servidor. En
+segundo lugar, su arquitectura modular permite que la base de datos se ejecute
+de forma embebida directamente dentro del proceso de Python o de manera
+independiente mediante un contenedor, lo que optimiza dr´asticamente el uso de
+recursos y memoria RAM en entornos limitados a CPU. Finalmente, destaca su
+excelente compatibilidad con el ecosistema de desarrollo de Python y su amplia
+adopci´on en la comunidad, lo que garantiza una API sencilla para operaciones de
+inserci´on, consulta, actualizaci´on y borrado (CRUD), as´ı como un soporte nativo
+para el filtrado avanzado de metadatos.
+• M´odulo de comunicaci´on, ingesta y normalizaci´on de ciberinteligencia:
+Este componente representa la capa de software desarrollada a medida para
+interactuar con la plataforma OpenCTI, resolviendo la adquisici´on de datos de
+seguridad y su transformaci´on hacia la base de datos vectorial. La conectividad
+l´ogica con el servidor se implementa bajo el patr´on de dise˜no Singleton con
+soporte multihilo (thread-safe) mediante un mecanismo de exclusi´on mutua (lock ),
+garantizando que exista una ´unica instancia activa del cliente de API oficial
+(OpenCTIApiClient) durante la ejecuPartes del sistema ...ci´on del sistema, lo que
+evita la saturaci´on de conexiones GraphQL en el nodo de OpenCTI.
+Sobre esta infraestructura de conexi´on se articulan tres subcomponentes de
+desarrollo propio en Python:
+• Cliente de consultas sem´anticas (OpenCTIRAGClient): Componente
+que se ejecuta en tiempo real dentro del flujo de la conversaci´on. Permite
+realizar b´usquedas exactas e intermedias sobre observables e indicadores
+bajo la estructura del est´andar STIX 2.1, rastreando de forma autom´atica
+las relaciones l´ogicas (relationships) creadas por los analistas y localizando
+reportes t´ecnicos relevantes que sirvan como evidencia contextualizada para
+el modelo.
+• Ingestor de entidades (OpenCTIIngestor): M´odulo encargado del apro-
+visionamiento masivo de datos hist´oricos. Implementa el protocolo de pa-
+ginaci´on oficial basado en cursores de OpenCTI (withPagination=True
+y endCursor) para descargar de forma secuencial y ordenada colecciones
+completas de actores de amenazas, malware, t´acticas, reportes e indicadores
+t´ecnicos, almacenando la informaci´on de ciberinteligencia en bruto localmente
+en formato JSON.
+• Normalizador sem´antico e indexador (OpenCTINormalizer): Clase de
+vital importancia para el RAG que resuelve el grafo de relaciones de OpenCTI
+(como la arista uses que vincula a un actor de amenazas con un malware
+espec´ıfico o un TTP de MITRE ATT&CK). El normalizador extrae las
+relaciones complejas y las unifica en plantillas textuales estructuradas y
+metadatos legibles para la IA. Posteriormente, un script de vectorizaci´on
+automatizado codifica estos textos normalizados en representaciones densas de
+384 dimensiones empleando el modelo local all-MiniLM-L6-v2, insert´andolos
+finalmente mediante un algoritmo por lotes (batches) en ChromaDB bajo una
+m´etrica de similitud de distancia del coseno para dar soporte a las b´usquedas
+de proximidad sem´antica.
+
+La arquitectura de la soluci´on propuesta se ha dise˜nado siguiendo un paradigma modular
+y desacoplado. Por restricciones corporativas, s´olo se dispone de una m´aquina virtual,
+por lo que todo est´a desplegado en la misma. No obstante, el sistema est´a dise˜nado para
+ser f´acilmente distribuible. Esta topolog´ıa, detallada en el diagrama de componentes de
+la Figura 1, permite separar de forma estricta el plano de interacci´on con el usuario e
+inferencia local del plano de ingesta, normalizaci´on y ciberinteligencia de amenazas.
+A nivel de infraestructura, la comunicaci´on entre los componentes se realiza a trav´es de
+puertos y endpoints espec´ıficos dentro de una red virtual interna, articul´andose en dos
+bloques tecnol´ogicos principales:
+• Dominio de Interacci´on e Inferencia Local (Plano Izquierdo): Este dominio
+gestiona la interfaz del analista y la ejecuci´on de la IA. El componente OpenWebUI
+act´ua como el frontend del sistema, comunic´andose directamente con el puerto
+9099 del Pipeline Server. Este ´ultimo act´ua como un middleware de intercepci´on y
+enrutamiento, derivando las consultas de enriquecimiento hacia el Backend RAG
+en el puerto 9000, concretamente al endpoint /query-context y transmitiendo
+el prompt final aumentado hacia el endpoint /api/chat de Ollama en el puerto
+11434, el cual expone localmente los modelos Lily y CyberOSS.
+• Dominio de Ciberinteligencia, Ingesta y Vectorizaci´on (Plano Derecho):
+Este dominio administra la adquisici´on de conocimiento de seguridad. El com-
+ponente OpenCTI Client encapsula la conexi´on ´unica hacia el puerto 8080 de
+la instancia externa de OpenCTI. De este cliente dependen de manera exclusiva
+el Ingestor (responsable del aprovisionamiento masivo de SDOs y SCOs) y el
+Backend RAG (responsable de las consultas sem´anticas y relacionales en caliente).
+Ambos m´odulos escriben y consultan, respectivamente, la base de datos vectorial
+ChromaDB a trav´es de su API REST en el puerto 8080.
+
+En la Figura 2 se detalla concretamente la organizaci´on del despliegue de todos los
+artefactos mencionados, as´ı como las comunicaciones que tienen entre ellos. Las comuni-
+caciones se expresan como flechas etiquetadas. Una flecha bidireccional (←→) significa
+que se manda una request y se espera response (por ejemplo, la flecha etiquetada con
+1 entre OpenWebUI y Pipelines, mientras que una flecha en una sola direcci´on (−→)
+significa que simplemente se env´ıan datos en una sola direcci´on (esto solo se da entre el
+ingestor y ChromaDB, etiquetada con II).
+Una vez definida la distribuci´on l´ogica y f´ısica de la infraestrutura, es fundamental
+definir la din´amica temporal que sigue el sistema. Como se ha mencionado previamente,
+el sistema sigue dos flujos de datos diferentes, por una parte est´a la ingesta, vectorizaci´on
+y almacenamiento de datos de OpenCTI (m´odulo Ingestor que interact´ua con OpenCTI
+y ChromaDB ), cuyas comunicaciones est´an etiquetadas con n´umeros romanos en el la
+figura
+Finalmente, en la Figura 3 se detalla dentro del propio Nodo IA, la distribuci´on de
+los directorios y los ficheros desarrollados para llevar a cabo el proyecto. Como se
+observa en la disposici´on jer´arquica de la ilustraci´on, se separan las funciones, por
+ejemplo, los despliegues de Docker se centralizan en un fichero docker-compose.yml
+en el directorio chat-feats, los modelos de IA para definir en Ollama se guardan en el
+directorio modelos ia, los pipelines tienen su propio directorio openwebui pipelines,
+sincronizado con el directorio de pipelines de dentro del contenedor, y todos los scripts
+de Python se alojan en el directorio python-scripts, separando el m´odulo de ingesti´on
+de datos en opencti, el motor de RAG en rag, y finalmente, el programa principal que
+pone en marcha el motor, main.py.
+
+El cometido de este m´odulo es conectarse a OpenCTI mediante el SDK (provisto por
+el paquete oficial pycti), configurando los credenciales adecuados (IP de OpenCTI y
+clave de la API). El cliente es pesado, y para evitar ser cargado m´ultiples veces, por
+ejemplo, por diferentes hilos de ejecuci´on, ralentizando el sistema completo, sigue un
+patr´on Singleton.
+Para cada tipo de entidad CTI que se cargar´a (concretamente threat actors, malware,
+attack patterns, indicators y reports), el m´odulo define qu´e atributos necesita recuperar.
+Para todos los tipos de objeto se cargan identificador, nombre, descripci´on y fecha de
+creaci´on. Para Threat Actors y Reports, estos son los ´unicos campos recuperados. Se
+recuperan campos adicionales para:
+• Malware: Para este grupo se recupera tambi´en el campo malware types, que
+define a qu´e categor´ıas de malware pertenece (e.g. ransomware, trojan, backdoor )
+• Attack Patterns: Para este grupo se recupera adem´as el campo x mitre id,
+que es el identificador MITRE asociado a una t´ecnica cuando el Attack Pattern
+pertenece al modelo MITRE ATT&CK[11]
+• Indicators: Se cargan adicionalmente los campos pattern type y pattern, que
+indican la sintaxis en la que est´a escrito el campo pattern, y la expresi´on t´ecnica
+que define el IoC. Esto es, el valor y la forma asociado al indicador (por ejemplo,
+un dominio cuyo valor es officeonlaine.com).
+As´ı, no se descarga todo el objeto CTI, ya que esto ser´ıa un proceso muy largo y pesado,
+sino s´olo los aspectos relevantes para las fases posteriores del procesado.
+Los datos se recuperan mediante ingesta paginada, consumiendo todas las p´aginas
+devueltas por OpenCTI hasta que no quedan m´as disponibles. Esto se debe a que
+OpenCTI puede tener del orden de cientos de miles o incluso millones de entidades, por
+lo que una ´unica llamada a la API no ser´ıa suficiente para recuperar todos los datos o,
+seg´un la configuraci´on de timeouts, podr´ıa no devolver nada.
+Una vez finalizada la extracci´on, guarda los datos obtenidos en ficheros JSON inde-
+pendientes. Por ejemplo, threat actors.json o indicators.json. En este caso, se
+guardan en el directorio /opt/data/raw/opencti. Como referencia, una ejecuci´on de
+este programa, concretamente el 8 de junio de 2026, carga 55 threat actors, 355 malwares,
+410 attack patterns, 515569 indicators y 5924 reports.
+Todo este proceso lo lleva a cabo el script opencti/ingest.py
+
+Este modulo se encarga de la normalizaci´on de los datos brutos extra´ıdos de OpenCTI.
+Transforma los objetos recuperados en documentos textuales homog´eneos adecuados
+para su posterior vectorizaci´on. Los datos extra´ıdos de OpenCTI se almacenan como
+JSON bruto, por lo que cada objeto recuperado mantiene su estructura original. Esa
+representaci´on no es la m´as adecuada para realizar b´usquedas sem´anticas, ya que los
+modelos de lenguajes trabajan mejor sobre texto descriptivo que sobre JSON complejos.
+Es una capa intermedia entre la ingesta bruta y la generaci´on de embeddings para
+contener, para cada objeto CTI, la informaci´on relevante en un formato legible, y m´as
+importante, igual para todos los objetos de un mismo tipo para facilitar la b´usqueda
+por parte del LLM al vectorizar el texto. Aunque indicadores y reportes se dejan tal
+y como est´an, se incluyen en esta parte la b´usqueda de relaciones de cierto tipos de
+objetos en OpenCTI para mejorar la sem´antica asociada al mismo:
+• Threat Actors: se incluyen relaciones tipo uses para recuperar Attack Patterns
+usados y Malware asociado.
+• Malware: se incluyen tambi´en relaciones tipo uses para recuperar Attack Patterns
+usados.
+• Attack Patterns: se incluyen relaciones tipo uses para recuperar Threat Actors
+que usan estos patrones y t´ecnicas.
+El resultado final del proceso de normalizaci´on son documentos estructurados, uniformes
+para cada tipo de objeto recuperado de OpenCTI. Por razones de procesado y eficiencia,
+se guardar´an en formato JSONL (JSON Lines), que almacena un objeto JSON por
+linea, aunque extrayendo el contenido y dejandolo en un formto humanamente legible,
+quedar´ıa como los ejemplo en el Listado 1.
+Esta parte del proceso es llevada a cabo por los scripts normalizer, que define los
+procesos de normalizaci´on para cada tipo de objeto y normalize all.py, que lee los
+ficheros JSON guardados, procesa la normalizaci´on de cada uno de estos ficheros y los
+guarda en su correspondiente fichero JSONL.
+
+Tras la fase de normalizaci´on, los objetos CTI extra´ıdos desde OpenCTI se encuentran
+representados como documentos textuales semiestructurados. Aunque estos documentos
+ya son legibles y contienen informaci´on relevante sobre actores, malware, t´ecnicas,
+indicadores e informes, todav´ıa no pueden ser utilizados directamente para realizar
+b´usquedas sem´anticas. Para ello es necesario transformarlos en representaciones vecto-
+riales, conocidas como embeddings, que permiten comparar documentos y consultas en
+funci´on de su similitud sem´antica.
+El proceso de vectorizaci´on consiste en cargar los ficheros .jsonl generados durante la
+normalizaci´on, extraer el campo text de cada documento y convertirlo en un vector
+num´erico mediante el modelo sentence-transformers/all-MiniLM-L6-v2. Este mo-
+delo genera una representaci´on densa del significado del texto, de forma que documentos
+conceptualmente similares quedan pr´oximos dentro del espacio vectorial. En paralelo,
+tambi´en se cargan los ficheros de metadatos asociados a cada colecci´on, comproban-
+do que el n´umero de textos y metadatos coincide antes de generar los embeddings.
+Esta comprobaci´on es importante para garantizar que cada vector queda asociado al
+documento y metadatos correctos.
+Los embeddings generados se almacenan en ficheros .npy, separados por tipo de entidad.
+As´ı, se generan ficheros independientes para threat actors, malware, attack patterns,
+reports e indicators. Esta separaci´on permite mantener una organizaci´on coherente
+del corpus CTI y facilita la carga posterior en colecciones diferenciadas dentro de Chro-
+maDB. Adem´as, guardar los embeddings como ficheros NumPy permite reutilizarlos sin
+necesidad de recalcularlos cada vez que se quiera reconstruir la base vectorial.
+Una vez generados los embeddings, el siguiente paso consiste en cargarlos en Chro-
+maDB. Para ello, el script de inserci´on se conecta al servidor de ChromaDB mediante
+HttpClient. Para cada tipo de entidad, el script crea o recupera una colecci´on con el
+mismo nombre de la entidad, por ejemplo threat actors, malware, attack patterns,
+reports o indicators. Las colecciones se configuran utilizando similitud coseno, una
+m´etrica habitual para comparar embeddings en sistemas de recuperaci´on sem´antica.
+Antes de insertar los documentos en ChromaDB, el script valida que los textos normali-
+zados, los metadatos y los embeddings tengan la misma longitud. Esta validaci´on evita
+desalineaciones entre documentos, vectores y metadatos. Posteriormente, la inserci´on se
+realiza por lotes, asociando a cada documento su identificador, su texto, su embedding
+y sus metadatos. De este modo, cada entrada almacenada en ChromaDB conserva tanto
+la representaci´on vectorial necesaria para la b´usqueda sem´antica como la informaci´on
+textual y de trazabilidad necesaria para interpretar el resultado recuperado.
+El resultado final de este proceso es una base vectorial organizada en colecciones CTI,
+donde cada documento procedente de OpenCTI puede ser recuperado por similitud
+sem´antica. Durante una consulta, el backend RAG genera un embedding de la pregunta
+o del indicador detectado y consulta las colecciones de ChromaDB para obtener los
+documentos m´as cercanos. Estos documentos se incorporan al contexto final como
+informaci´on contextual o inferida, diferenci´andola de la inteligencia expl´ıcita recuperada
+directamente desde OpenCTI.
+La vectorizaci´on y carga en ChromaDB son, por tanto, una parte esencial del sistema
+RAG. Esta fase permite complementar la informaci´on confirmada de OpenCTI con
+contexto sem´antico adicional, como actores, malware, t´ecnicas, informes o indicado-
+res relacionados conceptualmente con la consulta. Sin embargo, la similitud vectorial
+no implica una relaci´on confirmada entre entidades CTI. Por este motivo, los docu-
+mentos recuperados desde ChromaDB se tratan como contexto inferido y se separan
+expl´ıcitamente de la informaci´on considerada confirmada.
+Este proceso lo llevan a cabo los scripts embed all st.py, para la generaci´on de embeddings,
+y chroma load.py
+
+Se puede entender el workflow anterior como una tarea a realizar con la instalaci´on,
+para el primer poblado de la base de datos vectorial, y peri´odicamente para mantener el
+sistema actualizado respecto al conocimiento de OpenCTI. As´ı, este segundo workflow,
+que se puede ver etiquetado con n´umeros ar´abigos del 1 al 6 en la Figura 2 y en m´as
+detalle en es el caso de uso m´as com´un para esta aplicaci´on, en el cual el analista har´ıa
+una pregunta en la interfaz web seleccionando el modelo que quiere que responda, y
+espera a obtener un an´alisis del indicador por el que ha preguntado.
+
+Estas dos partes se consideran parte del mismo sistema, pese a ser realmente disjuntas
+y ser distribuibles (OpenWebUI al servidor Pipelinesa trav´es de una IP remota), dado
+que el servidor Pipelineses un plugin del ecosistema OpenWebUI, el cual se conecta a
+dicho servidor y permite mostrar y configurar las pipelines configuradas en la propia
+interfaz.
+OpenWebUI es una interfaz web conversacional. Su funci´on es proporcionar al usuario
+un entorno web desde el que formular preguntas sobre indicadores de compromiso y
+visualizar las respuestas generadas por los modelos. OpenWebUI no contiene contiene
+l´ogica de recuperaci´on de contexto y no accede directamente a OpenCTI o ChromaDB,
+dado que no puede hacerlo de forma nativa (s´ı que tiene una funcionalidad de base de
+conocimiento, pero esta se basa en la subida de archivos PDF o texto plano, e incluso
+b´usqueda en la web, pero no en la consulta de APIs privadas), por lo que delega esa
+funci´on en el servidor Pipelines.
+El despliegue de OpenWebUI se realiza mediante Docker , que facilita su ejecuci´on aislada
+y su integraci´on con el resto de componenetes del sistema. Dentro de la configuraci´on
+de este contenedor (que se puede consultar como docker-compose.yml en el Anexo B:
+Ficheros desarrollados). Se puede configurar la direcci´on de Ollama con la variable
+OLLAMA HOST, permitiendo la consulta directa de los modelos sobre Ollama, pero sin
+RAG. Adicionalmente, accediendo como usuario administrador (que en este caso, como
+es una plataforma expuesta de forma privada a un equipo concreto, puede ser accesible
+para todo el mundo configurando la variable WEBUI AUTH como false), yendo al Admin
+Panel, despu´es a los ajustes (Settings) y a Pipelines, se puede configurar la conexi´on
+con el servidor Pipelines. En este caso, como est´a dentro de la misma red Docker con el
+nombre pipelines, ser´a http://pipelines:9099.

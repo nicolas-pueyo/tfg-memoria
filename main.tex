@@ -1,3 +1,4 @@
+% !TeX encoding = UTF-8
 \documentclass[12pt]{article}
 \usepackage[spanish]{babel}
 \usepackage[utf8]{inputenc}
@@ -27,12 +28,16 @@
 	{└}{{\smash{\raisebox{-1ex}{\rule{1pt}{\baselineskip}}}}}1 % (O como lo tengas)
 }
  \usepackage{dirtree}
+ \usepackage{xspace}
 \addbibresource{TFG.bib}
 
 \title{Inteligencia Artificial On‑Premise para el análisis de IoCs con datos privados}
 \author{Nicolás Pueyo Soria}
 \date{Junio 2026}
 
+\newcommand{\pipelines}{\textit{Pipelines}}
+\newcommand{\OpenWebUI}{\textit{OpenWebUI}}
+	
 \setlength{\paperwidth}{21cm}          % Ancho de página
 \setlength{\paperheight}{29,7cm}       % Alto de página
 \setlength{\textwidth}{15.5cm}         % Ancho de zona con texto
@@ -89,6 +94,7 @@
 \renewcommand{\labelitemi}{$\bullet$}
 \renewcommand{\tablename}{Tabla}
 \renewcommand{\lstlistingname}{Listado}
+\renewcommand{\lstlistlistingname}{Índice de Listados}
 
 \begin{titlepage}
 
@@ -168,6 +174,11 @@ ESCUELA DE INGENIERÍA Y ARQUITECTURA\\
 \end{abstract}
 \newpage
 \tableofcontents
+
+\newpage
+\listoffigures
+\listoftables
+\lstlistoflistings
 
 \newpage
 \pagenumbering{arabic}
@@ -292,9 +303,9 @@ Con el propósito de estructurar de forma modular el asistente inteligente, cuya
     La elección de esta pareja de modelos permite someter la herramienta a una validación práctica frente a los benchmarks de referencia de la literatura científica. De acuerdo con el estudio de evaluación integral publicado en "Toward Cybersecurity-Expert Small Language Models" (arXiv:2510.14113) \cite{levi2025toward}, Lily-Cybersecurity-7B-v0.2 obtiene una puntuación promedio de 53.38\% en la resolución de tareas complejas de seguridad y ciberinteligencia, mientras que CyberPal-2.0-20B alcanza una puntuación de 80.33\% en el mismo conjunto de pruebas (CTI-Bench), superando incluso a modelos comerciales cerrados en la correlación de vulnerabilidades e identificación de tácticas.
     \item \textbf{Interfaz gráfica de usuario y orquestación de flujos (Open WebUI):} Para proporcionar a los analistas de ciberseguridad un entorno visual, accesible e interactivo, se evaluaron diversas plataformas autohospedadas capaces de desplegarse mediante contenedores Docker y configurarse de manera sencilla a través de parámetros de entorno. En una primera fase de diseño, se contempló la implementación de la interfaz \textit{ChatUI} desarrollada por Hugging Face. Sin embargo, este entorno fue descartado debido a incompatibilidades severas en su integración nativa con el motor de inferencia local Ollama. Durante las pruebas de concepto, la ambigüedad en la documentación oficial respecto a su interconexión local propició fallos críticos en el control del estado, tales como la imposibilidad de mapear y listar dinámicamente los modelos de Ollama, y respuestas de los modelos no mostradas en la interfaz.
 
-    Para solucionar estos inconvenientes, se seleccionó la plataforma \textit{Open WebUI}. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de Ollama, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web \cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \textit{Pipelines}. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje \cite{pipelines}. Esta capacidad resulta crítica para el alcance de este proyecto, ya que proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
+    Para solucionar estos inconvenientes, se seleccionó la plataforma \textit{Open WebUI}. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de Ollama, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web \cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \pipelines. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje \cite{pipelines}. Esta capacidad resulta crítica para el alcance de este proyecto, ya que proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
     
-    \item \textbf{Backend, motor de RAG y pipelines:} Este bloque representa el núcleo diferencial y el valor de desarrollo propio de este proyecto. Mientras que los componentes analizados hasta ahora se basan en el despliegue, parametrización y organización arquitectónica de imágenes de Docker (como Open WebUI o la base de datos vectorial), es en esta capa donde se introduce la lógica personalizada que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad. Aunque se describen como componentes diferenciados, el servidor de \textit{pipelines}, el backend de servicios y el motor de RAG operan como un único subsistema lógicamente acoplado debido a su constante cooperación en tiempo real. 
+    \item \textbf{Backend, motor de RAG y pipelines:} Este bloque representa el núcleo diferencial y el valor de desarrollo propio de este proyecto. Mientras que los componentes analizados hasta ahora se basan en el despliegue, parametrización y organización arquitectónica de imágenes de Docker (como Open WebUI o la base de datos vectorial), es en esta capa donde se introduce la lógica personalizada que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad. Aunque se describen como componentes diferenciados, el servidor de \pipelines, el backend de servicios y el motor de RAG operan como un único subsistema lógicamente acoplado debido a su constante cooperación en tiempo real. 
 
     El flujo de procesamiento de la información se inicia cuando el analista realiza una consulta en la interfaz gráfica que menciona un indicador de compromiso (IoC), momento en el cual la solicitud es interceptada de manera inmediata por el servidor de \textit{middleware Pipelines}. En lugar de transmitir la petición de forma directa al motor de inferencia local, el \textit{pipeline} extrae el \textit{payload} y desvía la solicitud hacia un \textit{endpoint} específico de nuestro backend. Al recibir este paquete, el backend analiza la petición y llama a las funciones del motor de RAG, el cual recupera contexto técnico sobre el indicador consultando de manera estructurada tanto la API de OpenCTI como la base de datos vectorial local (ChromaDB). Una vez obtenido este contexto histórico y relacional, se devuelve en forma de respuesta al \textit{pipeline}, encargado de reformular el \textit{prompt} del usuario inyectando la información recuperada y de transmitir la instrucción final enriquecida al modelo correspondiente para que este realice su razonamiento.
 
@@ -320,7 +331,7 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
 
 \begin{itemize}
     \item \textbf{Dominio de Interacción e Inferencia Local (Plano Izquierdo):} 
-    Este dominio gestiona la interfaz del analista y la ejecución de la IA. El componente \textit{OpenWebUI} actúa como el frontend del sistema, comunicándose directamente con el puerto \texttt{9099} del \textit{Pipeline Server}. Este último actúa como un \textit{middleware} de intercepción y enrutamiento, derivando las consultas de enriquecimiento hacia el \textit{Backend RAG} en el puerto \texttt{9000}, concretamente al endpoint \texttt{/query-context} y transmitiendo el prompt final aumentado hacia el endpoint \texttt{/api/chat} de \textit{Ollama} en el puerto \texttt{11434}, el cual expone localmente los modelos \textit{Lily} y \textit{CyberOSS}.
+    Este dominio gestiona la interfaz del analista y la ejecución de la IA. El componente \OpenWebUI actúa como el frontend del sistema, comunicándose directamente con el puerto \texttt{9099} del \textit{Pipeline Server}. Este último actúa como un \textit{middleware} de intercepción y enrutamiento, derivando las consultas de enriquecimiento hacia el \textit{Backend RAG} en el puerto \texttt{9000}, concretamente al endpoint \texttt{/query-context} y transmitiendo el prompt final aumentado hacia el endpoint \texttt{/api/chat} de \textit{Ollama} en el puerto \texttt{11434}, el cual expone localmente los modelos \textit{Lily} y \textit{CyberOSS}.
     \item \textbf{Dominio de Ciberinteligencia, Ingesta y Vectorización (Plano Derecho):} 
     Este dominio administra la adquisición de conocimiento de seguridad. El componente \textit{OpenCTI Client} encapsula la conexión única hacia el puerto \texttt{8080} de la instancia externa de \textit{OpenCTI}. De este cliente dependen de manera exclusiva el \textit{Ingestor} (responsable del aprovisionamiento masivo de SDOs y SCOs) y el \textit{Backend RAG} (responsable de las consultas semánticas y relacionales en caliente). Ambos módulos escriben y consultan, respectivamente, la base de datos vectorial \textit{ChromaDB} a través de su API REST en el puerto \texttt{8080}.
 \end{itemize}
@@ -338,11 +349,11 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
 \end{figure}
 
 \subsection{Workflow del sistema}
-   En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \textit{OpenWebUI} y \textit{Pipelines}, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
+   En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \OpenWebUI y \pipelines, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
 
-    Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la figura%~\ref{fig:despliegue} ($I$ y $II$).
+    Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la Figura~\ref{fig:despliegue} ($I$ y $II$).
     
-  Finalmente, en la Figura~\ref{fig:tree} se detalla dentro del propio \texttt{Nodo IA}, la distribución de los directorios y los ficheros desarrollados para llevar a cabo el proyecto. Como se observa en la disposición jerárquica de la ilustración, se separan las funciones, por ejemplo, los despliegues de \textit{Docker} se centralizan en un fichero \texttt{docker-compose.yml} en el directorio \texttt{chat-feats}, los modelos de IA para definir en Ollama se guardan en el directorio \texttt{modelos\_ia}, los pipelines tienen su propio directorio \texttt{openwebui\_pipelines}, sincronizado con el directorio de pipelines de dentro del contenedor, y todos los scripts de \textit{Python} se alojan en el directorio \texttt{python-scripts}, separando el módulo de ingestión de datos en \texttt{opencti}, el motor de RAG en \texttt{rag}, y finalmente, el programa principal que pone en marcha el motor, \texttt{main.py}.
+  Finalmente, en la Figura~\ref{fig:tree} se detalla dentro del propio \texttt{Nodo IA}, la distribución de los directorios y los ficheros desarrollados para llevar a cabo el proyecto, cuyo contenido se puede ver además en el~\textbf\textit{{\nameref{sec:anexoB}}}. Como se observa en la disposición jerárquica de la ilustración, se separan las funciones, por ejemplo, los despliegues de \textit{Docker} se centralizan en un fichero \texttt{docker-compose.yml} en el directorio \texttt{chat-feats}, los modelos de IA para definir en Ollama se guardan en el directorio \texttt{modelos\_ia}, los \textit{pipelines} tienen su propio directorio \texttt{openwebui\_pipelines}, sincronizado con el directorio de \textit{pipelines} de dentro del contenedor, y todos los scripts de \textit{Python} se alojan en el directorio \texttt{python-scripts}, separando el módulo de ingestión de datos en \texttt{opencti}, el motor de RAG en \texttt{rag}, y finalmente, el programa principal que pone en marcha el motor, \texttt{main.py}.
   
 \subsubsection{Consumo y vectorización de OpenCTI}
 \subsubsubsection{Ingestión}
@@ -414,7 +425,6 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 			.1 /opt.
 			.2 chat-feats.
 			.3 docker-compose.yml.
-			.3 README.md.
 			.2 modelos\_ia.
 			.3 all-MiniLM-L6-v2.
 			.3 cyberpal.
@@ -447,7 +457,6 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 			.4 ioc\_resolver.py.
 			.4 query\_classifier.py.
 			.3 main.py.
-			.3 README.md.
 			.3 requirements.txt.
 		}
 	\end{tcolorbox}
@@ -456,11 +465,23 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 \end{figure}
 
 \subsubsection{Frontend, backend y motor de RAG}
-\subsubsubsection{OpenWebUI}
+Se puede entender el workflow anterior como una tarea a realizar con la instalación, para el primer poblado de la base de datos vectorial, y periódicamente para mantener el sistema actualizado respecto al conocimiento de OpenCTI. Así, este segundo workflow, que se puede ver etiquetado con números arábigos del 1 al 6 en la Figura~\ref{fig:despliegue} y en más detalle en %TODO: poner Figura con workflow de ejemplo de esto
+es el caso de uso más común para esta aplicación, en el cual el analista haría una pregunta en la interfaz web seleccionando el modelo que quiere que responda, y espera a obtener un análisis del indicador por el que ha preguntado.
 
-\subsubsubsection{Servidor \textit{Pipelines}}
+\subsubsubsection{\OpenWebUI y servidor \pipelines}
+Estas dos partes se consideran parte del mismo sistema, pese a ser realmente disjuntas y ser distribuibles (\OpenWebUI al servidor \pipelines\ a través de una IP remota), dado que el servidor \pipelines\ es un plugin del ecosistema \OpenWebUI, el cual se conecta a dicho servidor y permite mostrar y configurar las \textit{pipelines} configuradas en la propia interfaz.
+
+\OpenWebUI es una interfaz web conversacional. Su función es proporcionar al usuario un entorno web desde el que formular preguntas sobre indicadores de compromiso y visualizar las respuestas generadas por los modelos. \OpenWebUI no contiene contiene lógica de recuperación de contexto y no accede directamente a \textit{OpenCTI} o \textit{ChromaDB}, dado que no puede hacerlo de forma nativa (sí que tiene una funcionalidad de base de conocimiento, pero esta se basa en la subida de archivos \textit{PDF} o texto plano, e incluso búsqueda en la web, pero no en la consulta de APIs privadas), por lo que delega esa función en el servidor \pipelines.
+
+El despliegue de \OpenWebUI\ se realiza mediante \textit{Docker} , que facilita su ejecución aislada y su integración con el resto de componenetes del sistema. Dentro de la configuración de este contenedor (que se puede consultar como \textit{docker-compose.yml} en el~\textbf{\textit{\nameref{sec:anexoB}}}). Se puede configurar la dirección de \textit{Ollama} con la variable \texttt{OLLAMA\_HOST}, permitiendo la consulta directa de los modelos listados por \textit{Ollama}, pero sin RAG. Adicionalmente, accediendo como usuario administrador (que en este caso, como es una plataforma expuesta de forma privada a un equipo concreto, puede ser accesible para todo el mundo configurando la variable \texttt{WEBUI\_AUTH} como \texttt{false}), yendo al \textit{Admin Panel}, después a los ajustes (\textit{Settings}) y a \textit{Pipelines}, se puede configurar la conexión con el servidor \pipelines. En este caso, como está dentro de la misma red \textit{Docker} con el nombre \texttt{pipelines}, será \texttt{http://pipelines:9099}. El flujo de un analista sería simplemente, en la interfaz web, seleccionar el modelo que quiere que conteste, escribir la pregunta y aguardar la respuesta.
+
+El servidor \pipelines\ es el componente que vuelve \OpenWebUI\ algo más que una interfaz genérica, permitiendo desarrollar todo tipo de integraciones a partir de scripts \textit{Python}. En lugar de enviar la pregunta directamente al modelo, la \textit{pipeline} la intercepta, solicita al backend el contexto relativo a esa pregunta, construye un prompt enriquecido y manda la pregunta al modelo, devolviendo al respuesta final a \OpenWebUI, que se encarga de mostrarla.
+
+Las pipelines se definen como ficheros en python con una clase pipe y unas valves que se pueden ver desde la interfaz, y se utilizan como si fueran modelos. Es decir, sustituyen a los modelos como tal.
 
 \subsubsubsection{Backend y motor RAG}
+% RESTRICCIONES: 
+% - El analista está obligado a preguntar por un indicador concreto, si no el sistema no sabe qué buscar de forma sólida y sólo podría consultar la base de datos vectorial. Para que esto fuera útil, necesitaríamos modelos mucho más potentes y una base de datos vectorial mucho más rica, y por ende, más recursos. Esto sería útil si fuera una línea de negocio importante que requiriera un proceso de negocio bueno, y por ende se destinaran más recursos.
 % Explicar los diferentes modos de contexto, bla bla bla
 
 \newpage
@@ -673,7 +694,7 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 \addcontentsline{toc}{section}{Anexos}
 \section*{Anexos}
 \addcontentsline{toc}{subsection}{Anexo A. Organización del trabajo.}
-\subsection*{Anexo A. Organización del trabajo.}
+\subsection*{Anexo A: Organización del trabajo.}
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.95\linewidth]{Imagenes/gantt}
@@ -714,7 +735,8 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 \end{table}
 
 \addcontentsline{toc}{subsection}{Anexo B. Ficheros desarrollados.}
-\subsection*{Anexo B. Ficheros desarrollados.}
+\subsection*{Anexo B: Ficheros desarrollados.}
+\label{sec:anexoB}
 
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=ingest.py,label=lst:ingest]{python/ingest.py}
 
@@ -725,6 +747,8 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=embed\_all\_st.py,label=lst:embedall]{python/embed_all_st.py}
 
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=chroma\_load.py,label=lst:chromaload]{python/chroma_load.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=docker-compose.yml,label=lst:dockercompose]{docker-compose.yml}
 
 \newpage
 \addcontentsline{toc}{section}{Bibliografía}

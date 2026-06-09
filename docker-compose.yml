@@ -1,0 +1,51 @@
+services: 
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: nodo_ia_chroma
+    networks:
+      - red_ciberinteligencia_privada
+    ports:
+      - "8000:8000"
+    volumes:
+      - /opt/chroma_data:/data
+
+  openwebui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: nodo_ia_openwebui
+    restart: always
+    networks:
+      - red_ciberinteligencia_privada
+    ports:
+      - "8080:8080"
+    environment:
+      OLLAMA_HOST: "http://[protegido]:11434"
+      WEBUI_AUTH: "false"
+    volumes:
+      - /opt/openwebui_data:/app/backend/data
+    depends_on:
+      - chromadb
+      - pipelines
+
+  pipelines:
+    image: ghcr.io/open-webui/pipelines:main
+    container_name: nodo_ia_pipelines
+    restart: always
+    networks:
+      - red_ciberinteligencia_privada
+    ports:
+      - "9099:9099"
+    environment:
+      PYTHONBUFFERED: 1
+    volumes:
+      - /opt/openwebui_pipelines:/app/pipelines
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+networks:
+  red_ciberinteligencia_privada:
+    driver: bridge
+
+volumes:
+  chroma_data:
+  chat_mongo_data:
+  openwebui_data:
