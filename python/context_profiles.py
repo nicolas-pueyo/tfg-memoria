@@ -4,10 +4,6 @@ CONTEXT_PROFILES = {
         "max_contextual_docs": 2,
         "contextual_detail": "compact",
     },
-    "medium": {
-        "max_contextual_docs": 4,
-        "contextual_detail": "summary",  # futuro
-    },
     "large": {
         "max_contextual_docs": 8,
         "contextual_detail": "full",

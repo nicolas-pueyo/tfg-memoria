@@ -1,0 +1,39 @@
+### IOC ANALYZED
+- Value: officeonlaine.com
+- Direct pattern indicators found: 2
+- Pattern-based indicators found: 2
+- Unique indicators shown: 2
+### INDICATORS ASSOCIATED WITH THIS IOC
+The following indicators are EXPLICITLY RELATED to this IOC according to OpenCTI.
+- Indicator: officeonlaine.com
+ Type: Domain-Name Status: Revoked Confidence: 100
+  Score: 60
+  Detection: True
+  Pattern: [domain-name:value = 'officeonlaine.com']
+  Description: Red Kontos
+  Valid from: 2025-01-16T17:11:19.000Z
+  Valid until: 2025-11-12T17:11:19.000Z
+  Source organization: iSight
+  Marking: TLP:CLEAR
+  External references:
+  - MISP | ROBORAT Malware Targets Think Tanks, Human Rights, Diplomacy, and Hospitality; Suspected Kazakhstan Nexus | https://misp.reyes.ccn-cert.cni.es/events/view/5ab38579-7594-4fdc-a1c5-0ce00a646538
+  - MISP | The Lowdown. A Candid Take on Cyber Operations (April 2018) | https://misp.reyes.ccn-cert.cni.es/events/view/5af16dd6-446c-459f-8620-05f30a646538
+- Indicator: http://officeonlaine.com/up/update.exe
+ Type: Url Status: Revoked Confidence: 100
+  Score: 30
+  Detection: True
+  Pattern: [url:value = 'http://officeonlaine.com/up/update.exe']
+  Valid from: 2025-01-16T16:54:49.000Z
+  Valid until: 2025-03-04T16:54:49.000Z
+  Source organization: iSight
+  Marking: TLP:CLEAR
+  External references:
+  - MISP | ROBORAT Malware Targets Think Tanks, Human Rights, Diplomacy, and Hospitality; Suspected Kazakhstan Nexus | https://misp.reyes.ccn-cert.cni.es/events/view/5ab38579-7594-4fdc-a1c5-0ce00a646538
+### CONTEXTUAL CTI INFORMATION (INFERRED FROM SIMILARITY)
+The following CTI-related information is retrieved via semantic similarity search.
+ - THREAT_ACTOR: thegentlemen
+    Descripción: ´No description available
+    Creado: 2026-02-18T18:14:10.980Z
+ - THREAT_ACTOR: incransom
+    Descripción: ´No description available
+    Creado: 2026-02-18T18:14:08.911Z

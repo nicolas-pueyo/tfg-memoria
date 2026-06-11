@@ -94,7 +94,7 @@
 \renewcommand{\labelitemi}{$\bullet$}
 \renewcommand{\tablename}{Tabla}
 \renewcommand{\lstlistingname}{Listado}
-\renewcommand{\lstlistlistingname}{Índice de Listados}
+\renewcommand{\lstlistlistingname}{Índice de listados}
 
 \begin{titlepage}
 
@@ -475,11 +475,88 @@ Estas dos partes se consideran parte del mismo sistema, pese a ser realmente dis
 
 El despliegue de \OpenWebUI\ se realiza mediante \textit{Docker} , que facilita su ejecución aislada y su integración con el resto de componenetes del sistema. Dentro de la configuración de este contenedor (que se puede consultar como \textit{docker-compose.yml} en el~\textbf{\textit{\nameref{sec:anexoB}}}). Se puede configurar la dirección de \textit{Ollama} con la variable \texttt{OLLAMA\_HOST}, permitiendo la consulta directa de los modelos listados por \textit{Ollama}, pero sin RAG. Adicionalmente, accediendo como usuario administrador (que en este caso, como es una plataforma expuesta de forma privada a un equipo concreto, puede ser accesible para todo el mundo configurando la variable \texttt{WEBUI\_AUTH} como \texttt{false}), yendo al \textit{Admin Panel}, después a los ajustes (\textit{Settings}) y a \textit{Pipelines}, se puede configurar la conexión con el servidor \pipelines. En este caso, como está dentro de la misma red \textit{Docker} con el nombre \texttt{pipelines}, será \texttt{http://pipelines:9099}. El flujo de un analista sería simplemente, en la interfaz web, seleccionar el modelo que quiere que conteste, escribir la pregunta y aguardar la respuesta.
 
-El servidor \pipelines\ es el componente que vuelve \OpenWebUI\ algo más que una interfaz genérica, permitiendo desarrollar todo tipo de integraciones a partir de scripts \textit{Python}. En lugar de enviar la pregunta directamente al modelo, la \textit{pipeline} la intercepta, solicita al backend el contexto relativo a esa pregunta, construye un prompt enriquecido y manda la pregunta al modelo, devolviendo al respuesta final a \OpenWebUI, que se encarga de mostrarla.
+El servidor \pipelines\ es el componente que transforma \OpenWebUI\ en más que una interfaz genérica, permitiendo desarrollar todo tipo de integraciones. Las \textit{pipelines} se definen como scripts \textit{Python} cargados por el servidor de \pipelines\ de \OpenWebUI. Cada \textit{pipeline} contiene una clase principal \texttt{Pipeline} que implementa el método \texttt{pipe}, y una clase \texttt{Valves}, que permite definir parámetros configurables desde la interfaz. Estos parámetros pueden visualizarse y modificarse desde \OpenWebUI, que permite ajustar el comportamiento de la \textit{Pipeline} sin modificar directamente el código.
 
-Las pipelines se definen como ficheros en python con una clase pipe y unas valves que se pueden ver desde la interfaz, y se utilizan como si fueran modelos. Es decir, sustituyen a los modelos como tal.
+En \OpenWebUI, las \textit{pipelines} se utilizan como si fueran modelos seleccionables. Es decir, el usuario no selecciona necesariamente un modelo de lenguaje puro, sino una \textit{pipeline} que aparece en la interfaz como una opción más de conversación. Sin embargo, initernamente, la \textit{pipeline} no envía la pregunta directamente al modelo, sino que intercepta la consulta, ejecuta lógica personalizada, solicita contexto al backend RAG y finalmente construye un \textit{prompt} enriquecido para el modelo local.
+
+Se han definido dos \textit{pipelines}: \texttt{Lily RAG} y \texttt{CyberOSS RAG}. Ambas comparten la misma idea general: reciben la pregunta del usuario desde \OpenWebUI, extraen el último mensaje de tipo \texttt{user}, llaman al backend RAG para recuperar contexto CTI y posteriormente envían la pregunta enriquecida al modelo correspondiente mediante \textit{Ollama}. La diferencia entre ambas \textit{pipelines} radica en el modelo utilizado, el formato concreto de llamada al modelo y el perfil de contexto utilizado.
+
+La clase \texttt{Valves} actúa como mecanismo de configuración. En la \textit{pipeline} de Lily se definen por defecto el modelo \texttt{lily-cyber} y  el perfil de contexto \texttt{small}, mientras que en el \textit{pipeline} de CyberOss se definen el modelo \texttt	{cybeross} (estos nombres son los identificadores que se les da en \textit{Ollama}) y un perfil de contexto más amplio. Más adelante se comentarán en detalle estos perfiles de contexto.
+
+El método \texttt{pipe} constituye el punto de entrada a la pipeline, es el método que \OpenWebUI\ llama, enviándole todo el cuerpo de la conversación, que contiene los mensajes intercambiados. La \textit{pipeline} extrae los mensajes del parámetro \texttt{kwargs} y delega la ejecución principal en el método \texttt{run}. Después devuelve el resultado, usando la palabra clave \texttt{yield}. Esto se debe a que \texttt{yield} convierte la función en un generador, que devuelve valores de forma iterable y permite que quien llama vaya consumiendo la salida. Este es el comportamiento \OpenWebUI\ espera.
+
+Ambas \textit{pipelines} incluyen comprobaciones para detectar tareas interans de \OpenWebUI, que suele lanzar peticiones adicionales al modelo (o \textit{pipelines}) seleccionados para rellenar datos como nombre, etiquetas o resumen del chat o posibles preguntas de \textit{follow-up} para seguir la conversación. Recibir estas tareas además de las preguntas sobre CTI satura a los modelos, se invierte mucho tiempo y recursos y pueden saltar \textit{timeouts} o resultados inesperados, así que cuando la \textit{pipeline} recibe esta clase de peticiones utiliza salvaguardas, como devolver respuestas mínimas, y evita ejecución de recuperación de contexto inútil.
+
+En cambio, si se recibe una pregunta real sobre CTI del usuario, la pipeline envía una petición al \textit{endpoint} \texttt{/query-context} del backend, con la pregunta del usuario y el tamaño del contexto a recuperar. La lógica completa de este backend será explicada en la siguiente sección. Una vez que se devuelve el contexto estructurado, lo incorpora al prompt, el cual varía entre \textit{pipelines}:
+\begin{itemize}
+	\item \textbf{Lily}: En esta \textit{pipeline}, se pide como mensaje de sistema, que el modelo actúe como un analista CTI, utilice toda la información que se le proporciona, extraiga indicadores y hechos explícitos, separe inteligencia factual (extraída de \textit{OpenCTI}) de información inferida obtenida de similitud vectorial en \textit{ChromaDB}.
+	 \item \textbf{CyberOSS}: el flujo general de la pipeline es similar, se le dan las mismas instrucciones que a \textit{Lily}, pero incorpora una adaptación específica de formato de \textit{prompt}. Durante las pruebas se observó que \textit{CyberOSS} no respondía correctamente con el formato estándar de chat utilizado por otros modelos (como \textit{Lily}) en \textit{Ollama}. Esto se debe a que utiliza unos tokes específicos (\texttt{<|end|><|start|>assistance} o \texttt{<|start|>user}) para delimitar las preguntas del usuario y las respuestas del asistente. 
+\end{itemize}
+
+Las \textit{pipelines} se definen en el directorio \texttt{openwebui\_pipelines}, que se sincroniza con el directorio interno del contenedor \textit{pipelines} al reiniciar este último, cargando las \textit{pipelines} y mostrándolas en la interfaz de \OpenWebUI\ si son correctas, o moviéndolas a un nuevo directorio \texttt{failed} si contienen errores.
 
 \subsubsubsection{Backend y motor RAG}
+El backend constituye el componente encargado de generar el contexto que posteriormente será entregado al modelo de lenguaje. A diferencia de las \textit{pipelines}, este backend no se encarga de comunicarse con los modelos, sino que actúa como un servicio especializado de recuperación y construcción de contexto. Su función es recibir la consulta del usuario, extraer el indicador por el que está preguntando, recuperar información explícita de \textit{OpenCTI}, obtener contexto adicional de \textit{ChromaDB} y devolver un bloque de contexto estructurado.
+
+Se implementa sobre \textit{FastAPI} y expone el \textit{endpoint}. Este endpoint recibe una petición (método \texttt{POST}) con al menos dos campos: la propia petición (de ahora en adelante \textit{query}, en el campo homónimo) y en el campo \texttt{context\_profile} recibe el perfil de contexto que define el nivel de detalle de la información a recuperar. Este diseño permite que los pipelines seleccionen más o menos contexto según el modelo que lo vaya a procesarlo.
+
+El flujo general del backend puede resumirse de la siguiente manera:
+\begin{enumerate}
+	\item Pregunta del usuario
+	\item Extracción del IOC
+	\item Resolución explícita del IOC en \textit{OpenCTI}
+	\item Búsqueda semántica en \textit{ChromaDB}
+	\item Construcción del contexto final
+	\item Devolución del contexto a la \textit{pipeline}
+\end{enumerate}
+El backend se mantiene desacoplado de la inferencia del modelo. Esta separación permite usar el mismo backend, mismos endpoints, con diferentes modelos y \textit{pipelines}.
+
+El fichero \texttt{app.py} define el servicio \textit{FastAPI} y define el \textit{endpoint} principal del backend. Al recibir una petición en \texttt{/query-context}, el backend valida que el cuerpo recibido sea \texttt{JSON} y y que contenga una pregunta válida. Si esto no se cumple, se devuelve un error controlado \texttt{422}. Una vez validada la entrada, se obtiene el perfil de contexto seleccionado. En caso de estar vacío, la opción por defecto es \texttt{small}. Este perfil determina cuántos documentos contextuales se recuperan y con qué nivel de detalle se incluirán en el contexto final.
+
+A continuación, se intenta extraer un indicador de compromiso de la pregunta utilizando el módulo \texttt{ioc\_resolver.py}. Si no se detecta ningún \texttt{IoC} válido, el backend devuelve un error indicando que no se ha encontrado un indicador en la pregunta.  Para detectar los indicadores, este módulo utiliza matching de expresiones regulares. Esto se debe a que los indicadores suelen seguir formatos claramente identificables. Por ejemplo, una dirección IPv4, una URL, un dominio o un hash tienen patrones sintácticos bien definidos(4 números del 0/1 al 255 separados por puntos, caracteres hexadecimales un numero determinado de veces...). Esta aproximación resulta más simple, rápida y controlable que usar un modelo de lenguaje o un clasificador para detectar indicadores. El orden de detección es el siguiente:
+\begin{enumerate}
+	\item \textbf{URL}. es importante que vaya antes que los dominios para evitar que una URL sea etiquetada parcialmente como un dominio.
+	\item \textbf{SHA-256}
+	\item \textbf{SHA-1}
+	\item \textbf{MD5}
+	\item \textbf{IPv4}
+	\item \textbf{Dominio}
+	\end{enumerate}
+	Una vez detectado el \textit{IoC}, el módulo \texttt{resolve\_ioc} consulta \textit{OpenCTI} mediante el cliente \texttt{rag\_client.py}, una encapsulación del cliente normal (\texttt{client.py}) de \textit{OpenCTI} para hacer consultas específicas de RAG. Esta resolución obtiene tres tipos de información: \texttt{direct\_indicators}, que proceden de búsquedas por valor, \texttt{pattern\_matches}, que filtran aquellos indicadores cuyo campo \texttt{pattern} contiene el \textit{IoC} y \texttt{related\_reports}, que permiten recuperar informes que mencionan el indicador. Esta información se considera la parte fuerte o explícita del contexto, ya que procede directamente de \textit{OpenCTI}.
+
+A continuación, se construye un texto legible mediante \texttt{build\_ioc\_context}. Este módulo transofmra el objeto recuperado desde \textit{OpenCTI} en un bloque de texto estructurado y legible, convirtiendo datos técnicos en una representación útil para análisis CTI. Combina los indicadores recuperados por búsqueda diredcta y por coincidencia de patrón. Aplica una deduplicación por clave (valor del indicador, estado, \textit{confidence} y patrón STIX) para evitar mostrar el mismo indicador varias veces en el contexto. Esto se debe a que durante las pruebas se observó que la aparición de elementos duplicados en el contexto tiende a confundir a modelos pequeños, empobreciendo sus respuestas. Cada indicador se muestra junto a sus campos más relevantes, como valor, tipo, estado (activo/revocado), puntuación, patrón, descripción, validez, u origen.
+
+Además de la consulta a \textit{OpenCTI}, el backend realiza una recuperación semántica contra \textit{ChromaDB}. Para ello, \texttt{app.py} utiliza el modelo \texttt{all-MiniLM-L6-v2} del framework \texttt{sentence-transformers} para convertir la consulta en un \textit{embedding}. Este \textit{embedding} se consulta contra varias colecciones vetoriales:
+\begin{itemize}
+	\item \texttt{threat\_actors}
+	\item  \texttt{malware}
+	\item \texttt{attack\_patterns}
+	\item \texttt{reports}
+	\item \texttt{indicators}
+\end{itemize}
+Para cada colección, el backend recupera los documentos más cercanos según similitud vectorial. Estos documentos proceden del proceso de ingesta de \textit{OpenCTI}. Esta recuperación permite aportar contexto adicional al modelo que pordía ser semánticamente relevante para la consulta, pero es importante recalcar que esta similitud no equivale a una relación confirmada. Es por esto que esta parte del contexto aparece diferenciada explícitamente de la inteligencia fuerte. 
+
+El contexto es filtrado de acuerdo a los ya mencionados perfiles de conexto (definidos en \texttt{context\_profiles.py}). Estos perfiles controlan cuántos documentos semánticos se incluyen en la respuesta y con qué nivel de detalle se presentan. El perfil \texttt{small} está pensado para modelos pequeños con poca capacidad de contexto, como \textit{Lily}. Limita el número de documentos inferidos y utiliza una versión compacta de los mismos. Presenta tipo de objeto recuperado, nombre, descripción y fecha de creación. Aunque es algo pobre, puede aportar algo de utilidad como contexto superficial. El contexto \texttt{large} incluye más documentos y mantiene el contenido completo. Está pensado para modelos de mayor capacidad como \textit{CyberOSS}., que pueden procesar más contexto y extraer relaciones más complejas. Inicialmente no se planteó la utilización de perfiles de contexto, pero se introdujo al realizar pruebas con \textit{Lily} y ver que el modelo daba respuestas pobres y apenas analizaba el contexto que se le daba. Si el conexto es demasiado grande, puede incluso no responder por cumplirse el \textit{timeout}.
+
+El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído de \textit{OpenCTI} con el contexto inferido recuperado de \textit{ChromaDB}. Es el último paso antes de devolver el contexto a la \textit{pipeline}. El módulo recibe tres elementos:
+\begin{itemize}
+	\item \texttt{ioc\_context\_text}: contiene la información explícita del \textit{IoC}.
+	\item \texttt{context\_docs}: contienen documentos recuperados por similitud semántica.
+	\item \texttt{context\_profile}.
+\end{itemize}
+ Finalmente, a función \texttt{\_prepare\_conextual\_docs} aplica el nivel de detalle solicitado según el perfil de contexto y \texttt{\\build\_final\_context} construye el bloque de contexto final. El el Listado~\ref{lst:ctx} se pueden ver dos ejemplos de contexto recuperado y devuelto a la \textit{pipeline}, tanto grande como pequeño para el indicador conocido \textit{'officeonlaine.com'}.
+ 
+ \lstinputlisting[language=Python, inputencoding=utf8/latin1,
+ breaklines=true,caption=Contextos para 'officeonlaine.com',label=lst:ctx]{context.txt}
+ 
+\begin{figure}[]
+	\centering
+	\includesvg[height=\textheight, width=1.25\textwidth]{Imagenes/secuencia.svg}
+	\caption{Workflow completo de secuencia}
+	\label{fig:secuencia}
+\end{figure}
+
+
 % RESTRICCIONES: 
 % - El analista está obligado a preguntar por un indicador concreto, si no el sistema no sabe qué buscar de forma sólida y sólo podría consultar la base de datos vectorial. Para que esto fuera útil, necesitaríamos modelos mucho más potentes y una base de datos vectorial mucho más rica, y por ende, más recursos. Esto sería útil si fuera una línea de negocio importante que requiriera un proceso de negocio bueno, y por ende se destinaran más recursos.
 % Explicar los diferentes modos de contexto, bla bla bla
@@ -738,6 +815,9 @@ Las pipelines se definen como ficheros en python con una clase pipe y unas valve
 \subsection*{Anexo B: Ficheros desarrollados.}
 \label{sec:anexoB}
 
+\lstinputlisting[language=Python,inputencoding=utf8/latin1,
+breaklines=true,caption=client.py,label=lst:client]{python/client.py}
+
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=ingest.py,label=lst:ingest]{python/ingest.py}
 
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=normalizer.py,label=lst:normalizer]{python/normalizer.py}
@@ -749,6 +829,29 @@ Las pipelines se definen como ficheros en python con una clase pipe y unas valve
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=chroma\_load.py,label=lst:chromaload]{python/chroma_load.py}
 
 \lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=docker-compose.yml,label=lst:dockercompose]{docker-compose.yml}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=lily\_pipeline.py,label=lst:lilypipeline]{python/lily_pipeline.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1, breaklines=true,caption=cybeross\_pipeline.py,label=lst:lcyberosspipeline]{python/cybeross_pipeline.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1,
+breaklines=true,caption=app.py,label=lst:app]{python/app.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1,
+breaklines=true,caption=ioc\_resolver.py,label=lst:iocresolver]{python/ioc_resolver.py}
+
+\lstinputlisting[language=Python,inputencoding=utf8/latin1,
+breaklines=true,caption=rag\_client.py,label=lst:ragclient]{python/rag_client.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1,
+breaklines=true,caption=ioc\_context\_builder.py,label=lst:iocctxbuild]{python/ioc_context_builder.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1,
+breaklines=true,caption=context\_profiles.py,label=lst:contextprofiles]{python/context_profiles.py}
+
+\lstinputlisting[language=Python, inputencoding=utf8/latin1,
+breaklines=true,caption=builder.py,label=lst:builder]{python/builder.py}
+
 
 \newpage
 \addcontentsline{toc}{section}{Bibliografía}

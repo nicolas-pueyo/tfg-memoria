@@ -1,0 +1,91 @@
+CONTEXTO PEQUEÑO
+
+### IOC ANALYZED
+[INFORMACIÓN DE OPENCTI IGUAL PARA AMBOS]
+### CONTEXTUAL CTI INFORMATION (INFERRED FROM SIMILARITY)
+The following CTI-related information is retrieved via semantic similarity search.
+ - THREAT_ACTOR: thegentlemen
+    Descripción: ´No description available
+    Creado: 2026-02-18T18:14:10.980Z
+ - THREAT_ACTOR: incransom
+    Descripción: ´No description available
+    Creado: 2026-02-18T18:14:08.911Z
+
+
+CONTEXTO GRANDE
+
+### IOC ANALYZED
+[INFORMACIÓN DE OPENCTI IGUAL PARA AMBOS]
+### CONTEXTUAL CTI INFORMATION (INFERRED FROM SIMILARITY)
+The following CTI-related information is retrieved via semantic similarity search.
+[01ec22a8-5a4e-4a69-a1ad-297792ee17a8]
+THREAT_ACTOR: thegentlemen
+Descripción: ´No description available
+TTPs usados:
+- N/A
+Malware asociado:
+- N/A
+Creado: 2026-02-18T18:14:10.980Z
+[b0e2b7f6-345c-4f33-898e-49d743b1594d]
+THREAT_ACTOR: incransom
+Descripción: ´No description available
+TTPs usados:
+- N/A
+Malware asociado:
+- N/A
+Creado: 2026-02-18T18:14:08.911Z
+[88f341f2-aa27-4053-8abf-810771cf215d]
+THREAT_ACTOR: safepay
+Descripción: ´No description available
+TTPs usados:
+- N/A
+Malware asociado:
+- N/A
+Creado: 2026-03-04T12:28:08.257Z
+[98f622eb-3335-49d1-9add-05a2b53be38c]
+THREAT_ACTOR: osiris
+Descripción: ´No description available
+TTPs usados:
+- N/A
+Malware asociado:
+- N/A
+Creado: 2026-03-23T15:29:16.121Z
+[826caec6-81e5-4c89-aac4-8acdcb4918e7]
+THREAT_ACTOR: morpheus
+Descripción: ´No description available
+TTPs usados:
+- N/A
+Malware asociado:
+- N/A
+Creado: 2026-02-27T08:41:03.098Z
+[3f15a188-fbbb-4ceb-903a-ed550bfcfb8c]
+MALWARE: PlugX
+Tipos: N/A
+Descripción: Malware
+TTPs usados:
+- Msiexec ()
+Malicious File ()
+Drive-by Compromise ()
+Spearphishing Link ()
+Web Protocols ()
+Malicious Link ()
+Match Legitimate Name or Location ()
+Dynamic API Resolution ()
+Email Accounts ()
+DLL Search Order Hijacking ()
+PowerShell ()
+Creado: 2026-01-16T11:26:15.991Z
+[6a59d49c-d226-48c2-b617-8efac786a948]
+MALWARE: ZeroT
+Tipos: N/A
+Descripción: Most recently, we have observed the same group targeting military and aerospace interests in Russia and Belarus. Since the summer of 2016, this group began using a new downloader known as ZeroT to install the PlugX remote access Trojan (RAT) and added Microsoft Compiled HTML Help (.chm) as one of the initial droppers delivered in spear-phishing emails.
+TTPs usados:
+- N/A
+Creado: 2026-01-16T11:26:15.992Z
+[9e199722-b99a-46ca-9389-6c6e999cc348]
+MALWARE: LP-Notes
+Tipos: N/A
+Descripción: None
+TTPs usados:
+- N/A
+Creado: 2026-01-19T16:25:20.948Z
