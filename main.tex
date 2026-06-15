@@ -29,6 +29,11 @@
 }
  \usepackage{dirtree}
  \usepackage{xspace}
+ \usepackage{tabularx}
+ \usepackage{array}
+ \usepackage{booktabs}
+ \newcolumntype{C}{>{\centering\arraybackslash}X}
+ 
 \addbibresource{TFG.bib}
 
 \title{Inteligencia Artificial On‑Premise para el análisis de IoCs con datos privados}
@@ -465,7 +470,7 @@ Este proceso lo llevan a cabo los scripts \textit{embed\_all\_st.py}, para la ge
 \end{figure}
 
 \subsubsection{Frontend, backend y motor de RAG}
-Se puede entender el workflow anterior como una tarea a realizar con la instalación, para el primer poblado de la base de datos vectorial, y periódicamente para mantener el sistema actualizado respecto al conocimiento de OpenCTI. Así, este segundo workflow, que se puede ver etiquetado con números arábigos del 1 al 6 en la Figura~\ref{fig:despliegue} y en más detalle en %TODO: poner Figura con workflow de ejemplo de esto
+Se puede entender el workflow anterior como una tarea a realizar con la instalación, para el primer poblado de la base de datos vectorial, y periódicamente para mantener el sistema actualizado respecto al conocimiento de OpenCTI. Así, este segundo workflow, que se puede ver etiquetado con números arábigos del 1 al 6 en la Figura~\ref{fig:despliegue} y en más detalle en la Figura~\ref{fig:secuencia}
 es el caso de uso más común para esta aplicación, en el cual el analista haría una pregunta en la interfaz web seleccionando el modelo que quiere que responda, y espera a obtener un análisis del indicador por el que ha preguntado.
 
 \subsubsubsection{\OpenWebUI y servidor \pipelines}
@@ -549,10 +554,10 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
  \lstinputlisting[language=Python, inputencoding=utf8/latin1,
  breaklines=true,caption=Contextos para 'officeonlaine.com',label=lst:ctx]{context.txt}
  
-\begin{figure}[]
+\begin{figure}[] % Cambiado a H (mayúscula) para fijar la posición con el paquete 'float'
 	\centering
-	\includesvg[height=\textheight, width=1.25\textwidth]{Imagenes/secuencia.svg}
-	\caption{Workflow completo de secuencia}
+	\includesvg[width=\textwidth,inkscapelatex=false]{Imagenes/secuencia.svg}
+	\caption{Workflow completo de consulta}
 	\label{fig:secuencia}
 \end{figure}
 
@@ -611,7 +616,7 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
         \hline
         ¿Es útil para análisis? & 1 & 2 \\
         \hline
-        Puntuación & 6 & 11 \\
+        Puntuación & 7 & 11 \\
         \hline
     \end{tabular}
     \caption{Resultados para dirección IP conocida}
@@ -651,19 +656,19 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
         \hline
         Pregunta & Lily & CyberOSS  \\
         \hline
-        ¿Menciona indicadores explícitos? & 0 & 0 \\
+        ¿Menciona indicadores explícitos? & 1 & 2 \\
         \hline
-        ¿Muestra bien el estado y confidence? & 0 & 0 \\
+        ¿Muestra bien el estado y confidence? & 0 & 2 \\
         \hline
-        Menciona y separa el contexto inferido & 0 & 0 \\
+        Menciona y separa el contexto inferido & 1 & 2 \\
         \hline
-        ¿Separa relaciones fuertes y débiles?  & 0 & 0 \\
+        ¿Separa relaciones fuertes y débiles?  & 0 & 1 \\
         \hline
-        ¿Alucina? & 0 & 0 \\
+        ¿Alucina? & 1 & 1 \\
         \hline
-        ¿Es útil para análisis? & 0 & 0 \\
+        ¿Es útil para análisis? & 1 & 2 \\
         \hline
-        Puntuación & 0 & 0 \\
+        Puntuación & 4 & 10 \\
         \hline
     \end{tabular}
     \caption{Resultados para pregunta por contexto inferido}
@@ -754,14 +759,55 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
         \hline
         & Lily & CyberOSS \\
         \hline
-        Promedio & 6,29 & 9,43 \\
+        Promedio & 6,86 & 10,86 \\
         \hline
-        Sobre 10 & 5,24 & 7,86 \\
+        Sobre 10 & 5,71& 9,05 \\
         \hline
     \end{tabular}
     \caption{Resultados finales}
     \label{tab:medias}
 \end{table}
+
+Fragmento de código
+
+\begin{table}[ht]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		Pregunta sobre dominio conocido & 01:49,2 & 03:17,3 \\
+		\hline
+		Pregunta sobre IP conocida & 01:16,6 & 02:20,5 \\
+		\hline
+		Pregunta sobre hash conocido & 01:29,7 & 02:45,0 \\
+		\hline
+		Pregunta abierta & 02:05,5 & 04:21,4 \\
+		\hline
+		Pregunta por contexto inferido & 01:43,8 & 02:37,0 \\
+		\hline
+		Separación fuerte/débil explícita & 00:35,3 & 02:01,6 \\
+		\hline
+		Relación con actor & 02:01,5 & 04:27,4 \\
+		\hline
+		\hline
+		Mejor tiempo & 00:35,3 & 02:01,6 \\
+		\hline
+		Peor tiempo & 02:05,5 & 04:27,4 \\
+		\hline
+		Rango & 01:30,2 & 02:25,7 \\
+		\hline
+		Media & 01:34,5 & 03:07,2 \\
+		\hline
+		Mediana & 01:43,8 & 02:45,0 \\
+		\hline
+		Desviación típica & 0,000361 & 0,000667 \\
+		\hline
+	\end{tabular}
+	\caption{Comparativa de tiempos de respuesta}
+	\label{tab:tiempos}
+\end{table}
+
 % Así se sustituye el número automáticamente:
 % Como se ve en la Tabla~\ref{tab:dominio}
 \newpage
@@ -808,7 +854,7 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
 		 \hline
 	\end{tabular}
 	\caption{Tabla de tareas y tiempos}
-	\label{tab:tiempos}
+	\label{tab:tareas}
 \end{table}
 
 \addcontentsline{toc}{subsection}{Anexo B. Ficheros desarrollados.}
@@ -851,6 +897,1133 @@ breaklines=true,caption=context\_profiles.py,label=lst:contextprofiles]{python/c
 
 \lstinputlisting[language=Python, inputencoding=utf8/latin1,
 breaklines=true,caption=builder.py,label=lst:builder]{python/builder.py}
+
+
+\addcontentsline{toc}{subsection}{Anexo C. Evaluación de modelos}
+\subsection*{Anexo C. Evaluación de modelos}
+\label{sec:anexoC}
+
+Este anexo recoge los detalles de la evaluación realizada, incluyendo las preguntas que se han realizado a los modelos, cuáles han sido sus respuestas y las valoraciones que se les ha dado.
+
+\subsubsection*{Criterios de evaluación}
+
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabularx}{\textwidth}{||X|c|c|C||} % <-- Usamos 'C' en la última columna
+		\hline
+		\textbf{Criterio} & \textbf{0} & \textbf{1} & \textbf{2} \\
+		\hline
+		¿Menciona indicadores explícitos? & No & Parcialmente & Completamente \\
+		\hline
+		¿Muestra bien el estado y \textit{confidence}? & No & Incompleto & Correcto \\
+		\hline
+		¿Menciona y separa el contexto inferido? & Ignora & Menciona pero mal & Menciona y separa correctamente \\
+		\hline
+		¿Separa relaciones fuertes y débiles? & Mezcla/confunde & Separa vagamente & Separa correctamente \\
+		\hline
+		¿Alucina? & Sí, gravemente & Levemente & No alucina \\
+		\hline
+		¿Es útil para análisis? & Genérico & Superficial & Útil para analista \\
+		\hline
+	\end{tabularx}
+	\caption{Rúbrica de evaluación utilizada}
+	\label{tab:criterios-evaluacion}
+\end{table}
+
+\subsubsection*{Preguntas utilizadas}
+
+\begin{table}[ht]
+	\centering
+	\small % Añadido para mantener la consistencia con la tabla anterior y que "respire" mejor
+	\begin{tabularx}{\textwidth}{||l|C||} % <-- Usamos 'C' para que la última columna sea dinámica y centrada
+		\hline
+		\textbf{Tipo de pregunta} & \textbf{Pregunta} \\
+		\hline
+		Dominio conocido & Provide details about resisterma.com.br \\
+		\hline
+		IP conocida & Provide some details about 85.209.195.160 \\
+		\hline
+		Hash conocido & Provide some details about 684634f51cb07d40e58c88b51c62ff1c83a18b69 \\
+		\hline
+		Pregunta abierta & Summarize information about 62.211.188.248 \\
+		\hline
+		Contexto adicional & What additional CTI context is available for officeonlaine.com? \\
+		\hline
+		Relación con actores & is 62.211.188.248 attributed to any actor according to context? \\
+		\hline
+		Separación fuerte/débil & Which information about officeonlaine.com is confirmed in OpenCTI and which is only inferred? \\
+		\hline
+	\end{tabularx}
+	\caption{Preguntas utilizadas en la evaluación}
+	\label{tab:preguntas-evaluacion}
+\end{table}
+
+\subsubsection*{Respuestas a las preguntas}
+\textbf{Dominio conocido}\\
+\textbf{Respuesta de Lily}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50
+		]
+		
+		Based on the context provided, \texttt{resisterma.com.br} is a domain name that was marked as revoked with a confidence of 100 by the OpenCTI platform. This indicates that there may be some concern regarding its security or legitimacy.
+		
+		According to the context, this domain has two explicit indicators associated with it: \texttt{resisterma.com.br} and \url{http://resisterma.com.br/RIC/RCH.exe}. Both of these indicators have a marking of TLP:CLEAR, which suggests that they can be openly discussed within the cybersecurity community without compromising sensitive information.
+		
+		In terms of the explicit indicators, \texttt{resisterma.com.br} is marked as revoked and has a score of 20, while \url{http://resisterma.com.br/RIC/RCH.exe} is also marked as revoked but has a higher score of 30. It is important to note that these scores can provide some indication of the severity or risk associated with these indicators.
+		
+		The context also indicates that there are external references available for both indicators, including an external analysis link for \texttt{resisterma.com.br} and two separate external analysis links for \url{http://resisterma.com.br/RIC/RCH.exe}. These references may contain additional information or insights about these indicators that could be valuable for further investigation.
+		
+		It is worth noting that there is no explicit description provided for the threat actor associated with this domain in the context, but it does indicate that the domain was created on \texttt{2026-02-18T18:14:10.980Z}. The context also mentions another threat actor named \texttt{incransom} that may be related to the domain.
+		
+		Overall, the context suggests that there is some level of concern regarding the security or legitimacy of \texttt{resisterma.com.br} and associated indicators. Further investigation using the available external references could provide additional insights into this matter.
+		
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona el dominio y la URL asociada, pero no enumera todos los campos relevantes.\\
+\textbf{¿Muestra bien el estado y confidence?} 1/2 - Indica correctamente que el dominio está revoked con confidence 100, y que la URL también está revoked pero en esta no menciona la confidence.\\
+\textbf{¿Menciona y separa el contexto inferido?} 0/2 - No, ignora el contexto inferido.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Menciona que es información obtenida de OpenCTI y dice que falta contexto pero no separa explícitamente fuerte de débil, además de ignorar lo inferido.\\
+\textbf{¿Alucina?} 1/2 - No gravemente, pero incluye información y muletillas no relacionadas con la pregunta, como "protect ourselves from malicious activities" o habla de inferencias no soportadas como "malware associated to this IOC".\\
+\textbf{¿Es útil para análisis?} 1/2 - Superficialmente, provee de scoring y confidence básicos, pero no dice nada significativo.\\
+\textbf{Total:} 5/12\\
+
+\vspace{0.5cm}
+\textbf{Respuesta de CyberOSS}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50,
+		fonttitle=\bfseries
+		]
+		
+		\subsubsection*{1. Explicit Indicators and Facts Extracted}
+		
+		\paragraph*{Domain Indicator}
+		\begin{description}
+			\item[Value:] \texttt{resisterma.com.br}
+			\item[Type:] Domain name
+			\item[Status:] Revoked
+			\item[Confidence:] 100\%
+			\item[Score:] 20
+			\item[Detection:] False
+			\item[Pattern:] \texttt{domain-name:value = 'resisterma.com.br'}
+			\item[Valid From:] 2026-05-09 04:49:38.000 Z
+			\item[Valid Until:] 2026-06-08 01:35:38.364 Z
+			\item[Source Organization:] camichel.com
+			\item[Marking:] TLP:CLEAR
+			\item[External References:] \hfill
+			\begin{itemize}
+				\item \url{https://iris-h.services/#/pages/report/ae8e93f132a92370feee62db694895653f4aade2}
+				\item \url{https://cape.contextis.com/submit/status/84215/}
+				\item \url{https://malshare.com/sample.php?action=detail&hash=7f027a7e20cda803e49053eb1a518522}
+			\end{itemize}
+		\end{description}
+		
+		\paragraph*{URL Indicator}
+		\begin{description}
+			\item[Value:] \url{http://resisterma.com.br/RIC/RCH.exe}
+			\item[Type:] URL
+			\item[Status:] Revoked
+			\item[Confidence:] 100\%
+			\item[Score:] 30
+			\item[Detection:] True
+			\item[Pattern:] \texttt{url:value = 'http://resisterma.com.br/RIC/RCH.exe'}
+			\item[Description:] binary
+			\item[Valid From:] 2019-06-30 09:25:47.000 Z
+			\item[Valid Until:] 2019-08-16 09:25:47.000 Z
+			\item[Source Organization:] camichel.com
+			\item[Marking:] TLP:CLEAR
+			\item[External References:] \hfill
+			\begin{itemize}
+				\item \url{https://iris-h.services/#/pages/report/ae8e93f132a92370feee62db694895653f4aade2}
+				\item \url{https://cape.contextis.com/submit/status/84215/}
+				\item \url{https://malshare.com/sample.php?action=detail&hash=7f027a7e20cda803e49053eb1a518522}
+			\end{itemize}
+		\end{description}
+		
+		\subsubsection*{2. CTI Entities Described}
+		
+		\paragraph*{Threat Actors}
+		\begin{description}
+			\item[thegentlemen] -- No description or TTPs provided.
+			\item[incransom] -- No description or TTPs provided.
+			\item[anubis] -- No description or TTPs provided.
+			\item[lapsus\$] -- No description or TTPs provided.
+			\item[interlock] -- No description or TTPs provided.
+		\end{description}
+		
+		\paragraph*{Malware}
+		\begin{description}
+			\item[Kazuar] -- A .NET-based backdoor with API exposure; linked to the Turla (Uroburos/Snake) group.
+			\item[Bazar] -- A downloader/backdoor used since 2020, associated with TrickBot campaigns and capable of deploying additional payloads.
+			\item[Volgmer] -- A backdoor Trojan used by Hidden Cobra, typically delivered via spear-phishing.
+		\end{description}
+		
+		\paragraph*{Campaigns / Reports}
+		No specific campaign names are listed; the context provides creation timestamps for threat-actor and malware entries but no campaign identifiers.
+		
+		\paragraph*{Techniques / TTPs}
+		No explicit TTPs are listed for the threat actors; generic categories such as ``Trusted Relationship'' and ``Botnet'' appear under Bazar's description.
+		
+		\paragraph*{Infrastructure}
+		The domain \texttt{resisterma.com.br} and the URL \url{http://resisterma.com.br/RIC/RCH.exe} are the primary infrastructure indicators. Both are marked as revoked and have defined validity periods.
+		
+		\subsubsection*{3. Relationships and Uncertainties}
+		
+		\paragraph*{Clear Relationships}
+		\begin{itemize}
+			\item The domain and URL are directly linked to the same threat-actor (camichel.com) and share identical external references, indicating they belong to a single malicious campaign.
+			\item The URL points to a binary (\texttt{RCH.exe}), suggesting the domain was used to host or deliver malicious payloads.
+		\end{itemize}
+		
+		\paragraph*{Uncertain / Missing Relationships}
+		\begin{itemize}
+			\item No explicit link between \texttt{resisterma.com.br} and any of the listed threat actors (\texttt{thegentlemen}, \texttt{incransom}, etc.) is provided.
+			\item The malware families Kazuar, Bazar, and Volgmer are described in the broader context but there is no direct evidence tying them to \texttt{resisterma.com.br}.
+			\item Campaign identifiers, specific TTPs, or operational details for the threat actors remain absent, leaving their connection to the domain speculative.
+		\end{itemize}
+		
+		\paragraph*{Inferred Contextual Information}
+		The similarity-search entries suggest that \texttt{resisterma.com.br} may be part of a larger set of indicators associated with the unnamed threat actors, but this is not explicitly confirmed.
+		
+		\subsubsection*{4. Summary of Findings}
+		\begin{description}
+			\item[Explicit Indicators:] The domain \texttt{resisterma.com.br} and the URL \url{http://resisterma.com.br/RIC/RCH.exe} are revoked, high-confidence indicators with defined validity windows and shared external analysis links.
+			\item[CTI Entities:] Multiple threat actors and malware families are listed in the context, but only the domain and URL are directly observable.
+			\item[Relationships:] The domain and URL are clearly connected; however, their association with specific threat actors or malware families is not explicitly documented, leaving those links uncertain.
+		\end{description}
+		
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona completamente los dos indicadores explícitos principales: el dominio resisterma.com.br y la URL http://resisterma.com.br/RIC/RCH.exe, incluyendo sus tipos, patrones, fuentes, periodos de validez y referencias externas.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que resisterma.com.br está Active con Confidence 100, Score 30 y Detection True, y que la URL http://resisterma.com.br/RIC/RCH.exe está Revoked con Confidence 100, Score 30 y Detection True.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de la sección “Contextual CTI Information (Inferred from Similarity)” y no los presenta como atribución confirmada.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa bien las relaciones explícitas de las relaciones inferidas: identifica la relación técnica directa entre el dominio y la URL porque la URL cuelga del dominio, y aclara que los threat actors son solo contexto por similitud sin evidencia directa de relación.\\
+\textbf{¿Alucina?} 1/2 - No inventa una atribución grave, pero contiene alguna imprecisión: afirma en el resumen que la URL está vinculada al mismo “timeframe” que el dominio, cuando sus periodos de validez son distintos (dominio en 2026 y URL en 2019), y también usa “share identical metadata” de forma algo amplia, aunque sí comparten confidence, score, source organization y marking.\\
+\textbf{¿Es útil para análisis?} 2/2 - Es muy útil para análisis porque estructura claramente los indicadores explícitos, resume sus atributos relevantes, identifica la relación técnica dominio-URL, menciona el contexto inferido y marca correctamente las incertidumbres sobre los threat actors.\\
+\textbf{Total:} 11/12\\
+
+
+\textbf{IP conocida}\\
+\textbf{Respuesta de Lily}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50
+		]
+		
+		Based on the context provided, \texttt{85.209.195.160} is an IP address that has been identified as aggressive and known to be malicious based on its listing in the AbuseIPDB database. The country code associated with this IP address is DE, indicating it is located in Germany. According to the last reported data, this IP address was first reported at \texttt{2026-05-19T08:00:55+00:00}.
+		
+		Furthermore, the information retrieved via semantic similarity search reveals that there are two threat actors named \texttt{thegentlemen} and \texttt{incransom}, but no detailed descriptions are available for these entities. It is important to note that this contextual CTI information is inferred through semantic similarity, meaning it may not be entirely accurate or reliable.
+		
+		In summary, \texttt{85.209.195.160} is an aggressive and malicious IP address located in Germany, as indicated by its listing in the AbuseIPDB database. While there are also two threat actors named \texttt{thegentlemen} and \texttt{incransom}, their descriptions are not explicitly provided in the context.
+		
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 1/2 - El indicador principal es mencionado e identificado como una IP maliciosa de la fuente AbuseIPDB, pero no habla de los factores presentes en el contexto.\\
+\textbf{¿Muestra bien el estado y confidence?} 1/2 - Menciona que tiene una abuse score de 100, pero no menciona la confidence y status de OpenCTI.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Sí, los actores adicionales son mencionados como info adicional.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Separa parcialmente, trata la IP como explícita y los actores adicionales como información extra, aunque no menciona que lo adicional no está directamente relacionado con el indicador, sino que es inferencia.\\
+\textbf{¿Alucina?} 1/2 - No gravemente, pero sí hace sugerencias que no se le piden.\\
+\textbf{¿Es útil para análisis?} 1/2 - Superficialmente ya que provee una síntesis básica pero carece de un desglose con métricas avanzadas.\\
+\textbf{Total:} 7/12\\
+
+\textbf{Respuesta de CyberOSS}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50,
+		fonttitle=\bfseries
+		]
+		\shorthandoff{"} % Desactivación preventiva para textos en inglés del modelo
+		
+		\subsubsection*{1. Explicit Indicators and Facts Extracted}
+		
+		\begin{description}
+			\item[IPv4 Address:] \texttt{85.209.195.160}
+			\item[Status:] Revoked (indicating the IP is no longer active or has been taken down)
+			\item[Confidence Level:] 100\% (high confidence that the IP is malicious)
+			\item[Score:] 20 (moderate risk rating)
+			\item[Detection:] True (the IP has been detected as malicious)
+			\item[Pattern:] \texttt{ipv4-addr:value = '85.209.195.160'}
+			\item[Description:] Identified as an aggressive IP known to be malicious on AbuseIPDB, with a country code of \textbf{DE} (Germany) and an abuse confidence score of \textbf{100}. Last reported at \textbf{2026-05-19T08:00:55+00:00}.
+			\item[Validity Period:] Valid from \textbf{2026-05-22T02:17:54.000Z} to \textbf{2026-06-11T07:52:33.434Z}.
+			\item[Source Organization:] AbuseIPDB.
+			\item[Marking:] TLP:CLEAR (information can be shared freely).
+			\item[External References:] \hfill
+			\begin{itemize}
+				\item AbuseIPDB database URL: \url{https://www.abuseipdb.com/}
+				\item MISP event URL: \url{https://misp.reyes.ccn-cert.cni.es/events/view/0cc6bb85-748b-4834-bf85-9f0bd8a5eab4}
+			\end{itemize}
+		\end{description}
+		
+		\subsubsection*{2. CTI Entities Mentioned}
+		
+		\begin{description}
+			\item[Threat Actors:] None explicitly linked to this IP in the provided data.
+			\item[Reports:] No specific reports are cited beyond the AbuseIPDB entry.
+			\item[Malware:] No malware is directly associated with this IP in the provided context.
+			\item[Campaigns:] No campaigns are mentioned in connection with this IP.
+			\item[Techniques (TTPs)] No specific TTPs are listed for this IP.
+			\item[Infrastructure:] The IP itself is the infrastructure element under analysis.
+		\end{description}
+		
+		\subsubsection*{3. Relationships and Uncertainties}
+		
+		\phantomsection % Asegura el destino hipertextual para evitar warnings en el PDF
+		\paragraph*{Explicit Relationships}
+		
+		\begin{itemize}
+			\item The IP is explicitly linked to AbuseIPDB as a known malicious address with high confidence.
+			\item The validity period and detection status are clearly defined.
+		\end{itemize}
+		
+		\phantomsection % Asegura el destino hipertextual para evitar warnings en el PDF
+		\paragraph*{Uncertainties}
+		
+		\begin{itemize}
+			\item \textbf{Threat Actor Association:} No direct threat actor is associated with this IP in the provided data.
+			\item \textbf{Malware or Campaign Linkage:} There is no explicit connection to specific malware or campaigns.
+			\item \textbf{TTPs:} No specific techniques are mentioned for this IP.
+			\item \textbf{Broader Context:} While the IP is marked as aggressive and malicious, the lack of additional context, such as associated threat actors, malware, or campaigns, limits the ability to place it within a broader threat landscape.
+		\end{itemize}
+		
+		\subsubsection*{4. Summary}
+		
+		The IP address \textbf{\texttt{85.209.195.160}} is a high-confidence malicious indicator from AbuseIPDB, valid between May and June 2026. It is marked as revoked, indicating it is no longer active. No direct links to threat actors, malware, or campaigns are provided in the context, leaving its broader threat role unclear. Further investigation would be required to determine any additional associations or operational use cases.
+		
+		\text{Ollama} % Restauración del shorthand en español
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 85.209.195.160 y recoge sus campos principales: tipo IPv4, patrón STIX, descripción, fuente AbuseIPDB, periodo de validez, marking y referencia externa.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que el indicador está Active, con Confidence 100, Score 100, Detection False y abuseConfidenceScore 100; además conserva el país DE y la fecha lastReportedAt.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de la información contextual CTI y deja claro que no tienen descripción disponible.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa adecuadamente la relación fuerte/confirmada entre la IP y AbuseIPDB de la relación débil/inferida con los threat actors; indica explícitamente que no hay evidencia directa que conecte thegentlemen o incransom con la IP y que la asociación procede solo de similitud.\\
+\textbf{¿Alucina?} 1/2 - No inventa atribuciones graves, pero hay una pequeña imprecisión al decir que TLP:CLEAR “indicates the information can be shared publicly without restriction”, que es una interpretación razonable pero algo más normativa que lo expresado literalmente en el contexto; también dice que AbuseIPDB “provides abuse reports and confidence scores”, inferencia lógica pero no estrictamente presente como explicación en el contexto.\\
+\textbf{¿Es útil para análisis?} 2/2 - Es útil para análisis porque estructura el IOC, recoge los atributos técnicos relevantes, identifica la fuente, describe la validez temporal, menciona el contexto inferido y, sobre todo, evita atribuir falsamente la IP a actores al marcar correctamente la incertidumbre.\\
+\textbf{Total:} 11/12.\\
+
+
+\textbf{Hash conocido}
+
+\textbf{Respuesta de Lily}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50
+		]
+		
+		Based on the provided context, here are some details about the indicator \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69}:
+		
+		\begin{itemize}
+			\item The indicator is represented by a unique identifier.
+			\item It has one direct pattern indicator and one pattern-based indicator associated with it.
+			\item There is only one unique indicator shown for this IOC according to OpenCTI.
+			\item The indicator is related to the following threat actors:
+			\begin{itemize}
+				\item \textbf{THREAT\_ACTOR:} \texttt{thegentlemen}, which was created on \texttt{2026-02-18T18:14:10.980Z} and has no description available.
+				\item \textbf{THREAT\_ACTOR:} \texttt{incransom}, which was created on \texttt{2026-02-18T18:14:08.911Z} and also has no description available.
+			\end{itemize}
+			\item No further details about the indicator or its relationship to these threat actors are provided in the context. However, we can infer that it is associated with cybersecurity threats based on the presence of the indicators and the mention of the threat actors.
+		\end{itemize}
+		
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el hash y el indicador explícito \texttt{URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe} y su hash correspondiente \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69}.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Indica correctamente el estado Revoked, la confidence 100, el score 30 y Detection: True.\\
+\textbf{¿Menciona y separa el contexto inferido?} 0/2 - Ignora los threat actors inferidos thegentlemen e incransom y además afirma que no puede determinar información inferida adicional, aunque sí existe una sección de contexto inferido.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Separa razonablemente la información explícita, pero no trata la parte inferida; debería haber indicado que thegentlemen e incransom son contexto por similitud y no atribución confirmada.\\
+\textbf{¿Alucina?} 2/2 - No inventa relaciones graves; la única imprecisión menor es decir “created on” para un campo que realmente aparece como Valid from, pero no supone una alucinación grave.\\
+\textbf{¿Es útil para análisis?} 1/2 - Es útil parcialmente porque identifica el hash, el fichero asociado, el estado, la confianza, la detección, la descripción, la organización fuente y el marcado, pero queda incompleta al no mencionar los actores inferidos, no usar la referencia externa MISP de campaña y no formular una conclusión clara sobre qué está confirmado y qué no.\\
+\textbf{Total:} 8/12\\
+
+\textbf{Respuesta de CyberOSS}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50,
+		fonttitle=\bfseries
+		]
+		
+		\subsubsection*{1. Extracted explicit indicators and facts}
+		
+		% Eliminados parámetros de extensión conflictivos; dejamos el entorno nativo limpio
+		\begin{description}
+			\item[File hash (SHA-1):] \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69}
+			\item[File name:] \texttt{URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe}
+			\item[File type / MIME:] \texttt{application/x-dosexec} (Windows executable)
+			\item[Hash type:] SHA-1
+			\item[StixFile status:] \textbf{Revoked} (confidence = 100\%)
+			\item[Score:] 30
+			\item[Detection:] True
+			\item[Pattern:] \texttt{file:name = 'URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe' AND file:hashes.'SHA-1' = '684634f51cb07d40e58c88b51c62ff1c83a18b69'}
+			\item[Archive contents:] The executable is contained in an archive whose source file is \texttt{URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.pdf.Gz}.
+			\item[Valid from:] 2020-10-14 07:58:31 UTC
+			\item[Valid until:] 2022-01-17 07:58:31 UTC
+			\item[Source organization:] CERT PKO BP
+			\item[Marking:] TLP:CLEAR
+			\item[External reference:] \url{https://misp.reyes.ccn-cert.cni.es/events/view/08c2dca4-3544-4fdd-a1c7-53fa6dbfb318}
+		\end{description}
+		
+		\subsubsection*{2. CTI entities mentioned in the context}
+		
+		\renewcommand{\arraystretch}{1.25}
+		% Se eliminan las barras verticales dobles '||' para garantizar compatibilidad con booktabs
+		\begin{tabularx}{\textwidth}{>{\bfseries}p{2.8cm} p{4.2cm} X}
+			\toprule
+			Entity type & Identifier / Name & Description from the context \\
+			\midrule
+			StixFile & \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69} & The file described above; status = revoked. \\
+			Threat actors & \texttt{thegentlemen}, \texttt{incransom}, \texttt{anubis}, \texttt{tengu}, \texttt{bravox} & Listed in the similarity-based CTI section; no further details provided. \\
+			Malware & \texttt{NanHaiShu}, \texttt{PlugX}, \texttt{DeedRAT} & Descriptions and TTPs are given in the similarity-based section. \\
+			Campaign & MISP campaign URL & Associated with the file indicator. \\
+			TTPs & Various techniques & Listed under the malware entries in the similarity-based section. \\
+			\bottomrule
+		\end{tabularx}
+		
+		\subsubsection*{3. Relationships that are clearly present}
+		
+		\begin{itemize}
+			\item The \textbf{StixFile} \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69} is directly linked to the \textbf{MISP campaign} URL in the external references.
+			\item The file's \textbf{name} and \textbf{SHA-1 hash} are the exact pattern used to identify the indicator.
+			\item The \textbf{validity period} defines the time window during which the indicator was considered active.
+			\item The \textbf{source organization} is CERT PKO BP and the marking is \textbf{TLP:CLEAR}.
+		\end{itemize}
+		
+		\subsubsection*{4. Relationships that remain uncertain}
+		
+		\begin{itemize}
+			\item The similarity-based CTI section lists several threat actors and malware families, but the context does not state any explicit link between these entities and the file hash.
+			\item No explicit technique is tied to the file itself; the TTPs belong to the malware entries in the similarity-based section.
+		\end{itemize}
+		
+		\subsubsection*{5. Summary of the analysis}
+		
+		The hash \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69} identifies a Windows executable named \texttt{URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe}. The indicator is a \textbf{revoked StixFile} published by \textbf{CERT PKO BP}, valid from \textbf{14 Oct 2020} to \textbf{17 Jan 2022}, and is associated with a \textbf{MISP campaign.}
+		
+		The broader CTI context lists several threat actors and malware families, but none are explicitly connected to this file. Consequently, the only concrete relationships are those defined by the indicator's metadata.
+		
+	\end{tcolorbox}
+\end{small}
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona completamente el indicador explícito asociado al hash: URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe 684634f51cb07d40e58c88b51c62ff1c83a18b69, identifica el fichero, el hash SHA-1 y recoge los principales campos del indicador.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Revoked, Confidence: 100, Score: 30 y Detection: True, además del tipo StixFile, el patrón, el periodo de validez, la organización fuente CERT PKO BP y el marking TLP:CLEAR.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de similitud semántica y no los presenta como relaciones confirmadas con el hash o el fichero.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa adecuadamente la relación fuerte/confirmada entre el hash y el fichero indicado por OpenCTI de la relación débil/inferida con los threat actors, aclarando que no hay evidencia directa ni atribución confirmada.\\
+\textbf{¿Alucina?} 1/2 - No inventa atribución grave y mantiene bien la incertidumbre, pero contiene alguna interpretación algo discutible: afirma que la revocación implica que el indicador fue “withdrawn or superseded”, cuando el contexto solo indica Status: Revoked sin explicar la causa; también dice que el fichero está vinculado a una campaña registrada en MISP, lo cual es razonable por la referencia externa, pero no debe interpretarse como una relación analítica más fuerte de lo que el contexto aporta.\\
+\textbf{¿Es útil para análisis?} 2/2 - Es muy útil para análisis porque estructura claramente los indicadores explícitos, resume sus atributos relevantes, identifica la relación técnica dominio-URL, menciona el contexto inferido y marca correctamente las incertidumbres sobre los threat actors.\\
+\textbf{Total:} 11/12.\\
+
+
+\subsection*{Pregunta abierta}
+
+\textbf{Respuesta de Lily}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50
+		]
+		\shorthandoff{"} % Desactivación preventiva para evitar el colapso de caracteres ingleses
+		
+		Based on the context provided, here is a summary of the information related to IP address \texttt{62.211.188.248}:
+		
+		\begin{description}
+			\item[1.] The IP address \texttt{62.211.188.248} is explicitly mentioned in the context as an indicator related to this IOC.
+			
+			\item[2.] According to OpenCTI, this IP address is marked as revoked with a confidence of 100. It also has a detection score of 20 and is classified as an IPv4-Addr.
+			
+			\item[3.] The score for the pattern \texttt{[ipv4-addr:value = '62.211.188.248']} is 20, indicating that it has been detected with some degree of confidence.
+			
+			\item[4.] The indicator related to this IP address \texttt{62.211.188.248} is explicitly described as an aggressive IP known to be malicious on AbuseIPDB. It belongs to Italy and has a last reported date of \texttt{2026-05-09T20:05:50+00:00}.
+			
+			\item[5.] The validity period for this indicator is from \texttt{2026-05-05T09:38:12.488Z} to \texttt{2026-06-06T22:11:56.810Z}.
+			
+			\item[6.] The source organization responsible for this indicator is AbuseIPDB. The marker for the indicator is TLP:CLEAR.
+			
+			\item[7.] In the contextual CTI information, there are two threat actors mentioned without descriptions: \texttt{thegentlemen} and \texttt{incransom}. However, it is unclear whether these threat actors have any direct relationship or association with the IP address \texttt{62.211.188.248}.
+		\end{description}
+		
+		Overall, this contextual information suggests that IP address \texttt{62.211.188.248} is known to be malicious and has been marked as such by AbuseIPDB. It falls under the category of an aggressive IP in Italy, with a last reported date in May 2026. The contextual CTI information mentions two threat actors, but their relationship or association with this IP address remains uncertain.
+		
+		\shorthandon{"} % Restauración segura de los shorthands en español
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 y lo identifica como una IP asociada a información confirmada de OpenCTI/AbuseIPDB.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Indica correctamente que el indicador está Active y que tiene confidence 100; también menciona el abuseConfidenceScore 100, Detection false, lastReportedAt y el periodo de validez.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos thegentlemen e incransom y aclara que proceden de semantic similarity search/contextual CTI information.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa correctamente la relación explícita de la IP con AbuseIPDB/OpenCTI de la relación débil o no confirmada con los threat actors inferidos, indicando que no existe una relación explícita entre ellos y la IP.\\
+\textbf{¿Alucina?} 1/2 - No inventa atribución grave, pero hay una inferencia algo imprecisa al decir que el indicador “matches a specific pattern or signature known to be associated with malicious activity”; el patrón mostrado es principalmente un patrón STIX de valor IPv4, no necesariamente una firma analítica más rica.\\
+\textbf{¿Es útil para análisis?} 2/2 - Es útil para un analista porque resume el IOC, su estado, confianza, fuente AbuseIPDB, país, abuse score, fecha de último reporte, periodo de validez y contexto inferido, además de advertir correctamente que no hay atribución confirmada a los threat actors.\\
+\textbf{Total:} 11/12.  Podemos ver que esta pregunta, muy parecida a la pregunta de IP conocida, pero diferente en la forma de enunciarse, pues la de IP conocida es "Provide details about", mientras que esta es "Summarize information". En la segunda claramente se le da una tarea al LLM, mientras que la primera es más vaga, ya que "dar detalles" es simplemente listar información para el LLM sin mucho que razonar (no tiene más detalles y datos que el contexto), mientras que "resumir información" le fuerza a procesar el contexto que se le pasa y generar una respuesta más rica.\\
+
+\textbf{Respuesta de CyberOSS}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50,
+		fonttitle=\bfseries
+		]
+		\shorthandoff{"} % Previene conflictos con las comillas dobles en inglés
+		
+		\subsubsection*{1. Explicit Indicators and Facts Extracted}
+		
+		\begin{description}
+			\item[IPv4 address:] \texttt{62.211.188.248}
+			\item[Status:] Revoked
+			\item[Confidence level:] 100
+			\item[Score:] 20
+			\item[Detection:] False
+			\item[Pattern:] \texttt{ipv4-addr:value = '62.211.188.248'}
+			\item[Description:] Known malicious IP on AbuseIPDB; country code \textbf{IT}; abuse confidence score \textbf{100}; last reported at \textbf{2026-05-09T20:05:50+00:00}
+			\item[Validity period:] \hfill
+			\begin{itemize}
+				\item \textbf{Valid from:} \texttt{2026-05-05T09:38:12.488Z}
+				\item \textbf{Valid until:} \texttt{2026-06-06T22:11:56.810Z}
+			\end{itemize}
+			\item[Source organization:] AbuseIPDB
+			\item[Marking:] TLP:CLEAR
+			\item[External reference:] \url{https://www.abuseipdb.com/}
+		\end{description}
+		
+		\subsubsection*{2. Described CTI entities}
+		
+		\phantomsection
+		\paragraph*{a. Threat actors}
+		
+		\begin{description}
+			\item[thegentlemen] -- No description available; created 2026-02-18T18:14:10.980Z
+			\item[incransom] -- No description available; created 2026-02-18T18:14:08.911Z
+			\item[anubis] -- No description available; created 2026-02-18T18:14:08.325Z
+			\item[bravox] -- No description available; created 2026-02-18T18:14:12.147Z
+			\item[lapsus\$] -- No description available; created 2026-03-01T10:54:04.617Z
+		\end{description}
+		
+		\phantomsection
+		\paragraph*{b. Malware}
+		
+		\begin{description}
+			\item[NanHaiShu] -- Whitepaper identifies it as a malicious program targeting government and private-sector organizations; created 2026-01-16T11:51:31.631Z
+			\item[PlugX] -- Malware with numerous TTPs: Msiexec, malicious file, drive-by compromise, spearphishing link, web protocols, malicious link, match legitimate name or location, dynamic API resolution, email accounts, DLL search order hijacking and PowerShell; created 2026-01-16T11:26:15.991Z
+			\item[LP-Notes] -- No description available; created 2026-01-19T16:25:20.948Z
+		\end{description}
+		
+		\phantomsection
+		\paragraph*{c. Campaigns}
+		
+		No explicit campaign information is provided in the context.
+		
+		\phantomsection
+		\paragraph*{d. Techniques (TTPs)}
+		
+		For \textbf{PlugX}, the following techniques are listed:
+		
+		\begin{itemize}
+			\item Msiexec
+			\item Malicious File
+			\item Drive-by Compromise
+			\item Spearphishing Link
+			\item Web Protocols
+			\item Malicious Link
+			\item Match Legitimate Name or Location
+			\item Dynamic API Resolution
+			\item Email Accounts
+			\item DLL Search Order Hijacking
+			\item PowerShell
+		\end{itemize}
+		
+		\subsubsection*{3. Explained relationships and uncertainties}
+		
+		\phantomsection
+		\paragraph*{Explicitly related entities}
+		
+		\begin{itemize}
+			\item The IP address \textbf{\texttt{62.211.188.248}} is directly linked to AbuseIPDB as a known malicious IP with confidence 100.
+			\item The IP's status is ``Revoked'', indicating it was previously flagged as malicious but has since been cleared.
+		\end{itemize}
+		
+		\phantomsection
+		\paragraph*{Inferred relationships via semantic similarity}
+		
+		\begin{itemize}
+			\item The list of threat actors (\texttt{thegentlemen}, \texttt{incransom}, \texttt{anubis}, \texttt{bravox}, \texttt{lapsus\$}) and malware (\texttt{NanHaiShu}, \texttt{PlugX}, \texttt{LP-Notes}) are presented in the same context, but no direct association with the IP address is stated.
+			\item Therefore, while these entities are part of the broader CTI dataset, there is \textbf{no explicit evidence} that they used or are connected to \textbf{\texttt{62.211.188.248}}.
+		\end{itemize}
+		
+		\phantomsection
+		\paragraph*{Uncertainties}
+		
+		\begin{itemize}
+			\item The context does not provide any campaign name or specific TTPs for the threat actors, leaving their operational details unknown.
+			\item The only concrete link for the IP is its AbuseIPDB entry; any other connections would be speculative without additional data.
+		\end{itemize}
+		
+		\subsubsection*{Summary}
+		
+		The IP \textbf{\texttt{62.211.188.248}} is a revoked, high-confidence malicious address recorded in AbuseIPDB, with country code IT and last reported on 2026-05-09. The surrounding CTI data lists several threat actors and malware families, but none are explicitly tied to this IP. Consequently, the only factual intelligence about the address is its AbuseIPDB status and associated metadata.
+		
+		\shorthandon{"} % Reactiva los shorthands de babel en español
+	\end{tcolorbox}
+\end{small}
+
+\vspace{0.5cm}
+{\large \textbf{Valoración}}\\
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 e identifica sus campos principales: tipo IPv4, patrón STIX, descripción AbuseIPDB, fuente, periodo de validez, marking y referencia externa.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Active, Confidence 100, Score 50, Detection False, abuseConfidenceScore 100, countryCode IT y lastReportedAt.\\
+\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de semantic similarity search y aclara que no están directamente vinculados a la IP en los datos proporcionados.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa adecuadamente la relación fuerte/confirmada entre la IP y AbuseIPDB de la relación débil/inferida con los threat actors, indicando que no hay evidencia directa ni enlace explícito entre thegentlemen/incransom y la IP.\\
+\textbf{¿Alucina?} 1/2 - No inventa una atribución confirmada, pero sí introduce una inferencia no soportada al decir que la IP podría estar implicada en C2, distribución de malware u otras operaciones ilícitas; el contexto solo indica “aggressive IP known malicious on AbuseIPDB” y no especifica esa naturaleza concreta de actividad.\\
+\textbf{¿Es útil para análisis?} 2/2 - Es útil para análisis porque resume de forma estructurada el IOC, sus atributos técnicos, fuente, validez, referencia externa, contexto inferido y limitaciones analíticas, además de evitar atribución directa no confirmada a actores.\\
+\textbf{Total:} 11/12.\\
+
+
+\subsection*{Contexto CTI adicional}
+
+\textbf{Respuesta de Lily}
+\begin{small}
+	\begin{tcolorbox}[
+		breakable,
+		colback=gray!3,
+		colframe=gray!50
+		]
+		
+		Based on the context provided, there is limited additional CTI context available for \texttt{officeonlaine.com} beyond what has already been explicitly mentioned. However, it is worth noting that semantic similarity search revealed two threat actors associated with this IOC: \texttt{thegentlemen} and \texttt{incransom}. Their descriptions are not available in the context.
+		
+		In terms of techniques or infrastructure related to \texttt{officeonlaine.com}, there is no explicit indication in the provided context. It would be beneficial to gather more intelligence on these threat actors and potentially correlate them with other known campaigns or attack vectors to gain a better understanding of the security risks associated with \texttt{officeonlaine.com}.
+		
+		Overall, it is important for cybersecurity professionals like us to continue monitoring and analyzing CTI information to stay up-to-date on any potential threats and vulnerabilities related to \texttt{officeonlaine.com}.
+		
+		\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona \texttt{officeonlaine.com}, pero no recoge correctamente los dos indicadores explícitos disponibles: el dominio \texttt{officeonlaine.com} y la URL \url{http://officeonlaine.com/up/update.exe}. Tampoco menciona atributos explícitos relevantes como patrón, fuente \texttt{iSight}, descripción \texttt{Red Kontos}, referencias MISP o periodo de validez.\\
+		\textbf{¿Muestra bien el estado y confidence?} 0/2 - No menciona que ambos indicadores están \texttt{Revoked}, ni que tienen \texttt{Confidence: 100}, ni los scores \texttt{60} y \texttt{30}, ni \texttt{Detection: True}.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 1/2 - Menciona \texttt{thegentlemen} e \texttt{incransom}, pero ignora otros elementos inferidos presentes en el contexto, como \texttt{safepay}, \texttt{osiris}, \texttt{morpheus}, \texttt{PlugX}, \texttt{ZeroT} y \texttt{LP-Notes}. Además, dice que los actores están ``associated with this IOC'', lo cual es demasiado fuerte: el contexto solo indica que fueron recuperados por similitud semántica.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 0/2 - No separa bien las relaciones explícitas de las inferidas. Presenta \texttt{thegentlemen} e \texttt{incransom} como asociados al IOC, cuando deberían tratarse como contexto inferido no confirmado. Tampoco distingue la relación fuerte de los indicadores OpenCTI frente al contexto semántico débil.\\
+		\textbf{¿Alucina?} 1/2 - No inventa una atribución concreta grave, pero sí formula incorrectamente que \texttt{thegentlemen} e \texttt{incransom} están asociados con el IOC. También afirma que no hay técnicas o infraestructura relacionadas, cuando el contexto sí incluye malware y TTPs asociadas a \texttt{PlugX}, aunque no estén explícitamente vinculadas al dominio.\\
+		\textbf{¿Es útil para análisis?} 1/2 - Es parcialmente útil porque identifica que hay contexto inferido y menciona dos actores, pero es superficial, omite gran parte del contexto disponible y termina con recomendaciones genéricas. No proporciona una separación clara entre lo confirmado por OpenCTI y lo inferido por similitud.\\
+		\textbf{Total:} 4/12
+		
+		
+		\textbf{Respuesta de CyberOSS}
+		\begin{small}
+			\begin{tcolorbox}[
+				breakable,
+				colback=gray!3,
+				colframe=gray!50
+				]
+				\shorthandoff{"} % Previene conflictos con las comillas dobles en inglés o formatos de fecha
+				
+				\subsubsection*{1. Explicit Indicators and Facts Extracted}
+				
+				\phantomsection
+				\paragraph*{Domain Indicator}
+				
+				\begin{description}
+					\item[Value:] \texttt{officeonlaine.com}
+					\item[Type:] Domain-Name
+					\item[Status:] Revoked
+					\item[Confidence:] 100\%
+					\item[Score:] 60
+					\item[Detection:] True
+					\item[Pattern:] \texttt{[domain-name:value = 'officeonlaine.com']}
+					\item[Description:] ``Red Kontos''
+					\item[Validity:] 2025-01-16 T17:11:19 Z $\rightarrow$ 2025-11-12 T17:11:19 Z
+					\item[Source Organization:] iSight
+					\item[Marking:] TLP:CLEAR
+					\item[External References:] \hfill
+					\begin{itemize}
+						\item MISP event ``ROBORAT Malware Targets Think Tanks, Human Rights, Diplomacy, and Hospitality; Suspected Kazakhstan Nexus''
+						\item MISP event ``The Lowdown. A Candid Take on Cyber Operations (April 2018)''
+					\end{itemize}
+				\end{description}
+				
+				\phantomsection
+				\paragraph*{URL Indicator}
+				
+				\begin{description}
+					\item[Value:] \url{http://officeonlaine.com/up/update.exe}
+					\item[Type:] URL
+					\item[Status:] Revoked
+					\item[Confidence:] 100\%
+					\item[Score:] 30
+					\item[Detection:] True
+					\item[Pattern:] \texttt{[url:value = 'http://officeonlaine.com/up/update.exe']}
+					\item[Validity:] 2025-01-16 T16:54:49 Z $\rightarrow$ 2025-03-04 T16:54:49 Z
+					\item[Source Organization:] iSight
+					\item[Marking:] TLP:CLEAR
+					\item[External Reference:] Same MISP event as above (ROBORAT).
+				\end{description}
+				
+				\subsubsection*{2. CTI Entities Mentioned}
+				
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm} p{3cm} X X}
+					\toprule
+					Entity & Type & Description / Role & Relationship to \texttt{officeonlaine.com} \\
+					\midrule
+					iSight & Source Organization & Provides the indicator data (domain and URL) for \texttt{officeonlaine.com}. & Direct source of the IOC data. \\
+					
+					ROBORAT Malware & Malware & Targeted think-tanks, human-rights groups, diplomacy and hospitality sectors; linked to a suspected Kazakhstan nexus. & The domain \texttt{officeonlaine.com} is cited in the MISP event describing ROBORAT activity, suggesting the domain may have been used by or associated with this malware family. \\
+					
+					The Lowdown & Report & A MISP-published analysis of cyber operations (April 2018). & The domain appears in this report, indicating it was observed in broader cyber-operation discussions. \\
+					
+					PlugX & Malware & Remote-access Trojan (RAT) delivered via various droppers. & Listed in the contextual CTI as a malware family; no explicit link to \texttt{officeonlaine.com} but appears in the same semantic-search context. \\
+					
+					ZeroT & Malware & Downloader used to install PlugX; observed targeting military and aerospace interests in Russia/Belarus. & Also appears in the contextual CTI; no direct link to the domain. \\
+					
+					LP-Notes & Malware & No description provided. & Appears in the contextual CTI; no direct link to the domain. \\
+					
+					Threat Actors: \texttt{thegentlemen}, \texttt{incransom}, \texttt{safepay}, \texttt{osiris}, \texttt{morpheus} & Threat Actors & No descriptions or TTPs provided. & Listed in the contextual CTI; no explicit connection to \texttt{officeonlaine.com}. \\
+					\bottomrule
+				\end{tabularx}
+				
+				\subsubsection*{3. Relationships -- What Is Clearly Present vs. What Remains Uncertain}
+				
+				\phantomsection
+				\paragraph*{Clearly Present}
+				
+				\begin{itemize}
+					\item The domain \texttt{officeonlaine.com} and the URL \url{http://officeonlaine.com/up/update.exe} are explicitly recorded as indicators with high confidence (100\%).
+					\item Both indicators are tied to the source organization \textbf{iSight} and share the same external reference to the \textbf{ROBORAT} MISP event, indicating that the domain was observed in the context of ROBORAT activity.
+					\item The description ``Red Kontos'' is attached to the domain indicator, but no further technical details are provided.
+				\end{itemize}
+				
+				\phantomsection
+				\paragraph*{Uncertain / Not Explicitly Linked}
+				
+				\begin{itemize}
+					\item \textbf{Threat Actors} (\texttt{thegentlemen}, \texttt{incransom}, \texttt{safepay}, \texttt{osiris}, \texttt{morpheus}) appear in the contextual CTI but there is no explicit evidence that any of them used or operated the \texttt{officeonlaine.com} domain. Their inclusion is likely due to semantic similarity searches, not direct attribution.
+					\item \textbf{Malware families} such as \textbf{PlugX}, \textbf{ZeroT}, and \textbf{LP-Notes} are listed in the contextual CTI. While they are associated with the same broader threat-intel dataset, the provided data does not show a direct relationship to the \texttt{officeonlaine.com} indicators.
+					\item The \textbf{ROBORAT} malware is the only entity with a direct contextual link via the MISP event to the domain, but the nature of that link (for example whether the domain was a C2 server, dropper host, or merely observed in the same campaign) is not detailed.
+				\end{itemize}
+				
+				\subsubsection*{4. Summary of Additional CTI Context}
+				
+				\begin{itemize}
+					\item \textbf{Explicit IOC data:} The domain and URL are revoked, high-confidence indicators supplied by iSight, with a description ``Red Kontos''.
+					\item \textbf{Contextual CTI:} The domain appears in a MISP event describing ROBORAT activity, suggesting a possible association with that malware family. Additional entities, including threat actors and other malware, are present in the same semantic-search context but lack concrete evidence tying them to \texttt{officeonlaine.com}.
+				\end{itemize}
+				
+				\subsubsection*{5. Final Answer}
+				
+				The additional CTI context for \texttt{officeonlaine.com} consists of its explicit indicator details, domain and URL, and its inclusion in a MISP event that links it to the ROBORAT malware campaign. While other threat actors and malware families appear in the broader contextual dataset, no direct evidence connects them to this domain; therefore, the only concrete additional context is the ROBORAT association.
+				
+				\shorthandon{"} % Reactiva los shorthands de babel
+			\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales: \texttt{officeonlaine.com} y la URL \url{http://officeonlaine.com/up/update.exe}, incluyendo tipo, estado, confidence, score, detection, patrón, validez, fuente y referencias externas.\\
+		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Recoge correctamente que ambos indicadores están \texttt{Revoked}, con \texttt{Confidence: 100}, además de los scores \texttt{60} y \texttt{30}, y \texttt{Detection: True}.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos \texttt{thegentlemen}, \texttt{incransom}, \texttt{safepay}, \texttt{osiris} y \texttt{morpheus}, y los malware recuperados por similitud \texttt{PlugX}, \texttt{ZeroT} y \texttt{LP-Notes}; además indica correctamente que no hay enlace explícito con el dominio y que proceden del contexto semántico.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Separa bien la mayoría de relaciones fuertes y débiles, especialmente con los actores y malware inferidos; sin embargo, sobrefortalece ligeramente la relación con \texttt{ROBORAT}, tratándola como ``concrete additional context'' o asociación casi directa. El contexto sí contiene referencias externas a \texttt{ROBORAT}, pero no define con claridad el rol técnico exacto del dominio dentro de esa actividad.\\
+		\textbf{¿Alucina?} 1/2 - No hay una alucinación grave ni atribución falsa a los actores inferidos; sin embargo, introduce inferencias algo fuertes, como hablar de ``ROBORAT malware campaign'' o sugerir que el dominio pudo estar ``used by or associated with this malware family''. Es plausible por la referencia externa, pero no está plenamente confirmado por el contexto entregado.\\
+		\textbf{¿Es útil para análisis?} 2/2 - Es una respuesta muy útil para análisis CTI: estructura bien el IOC, separa indicadores explícitos de entidades inferidas, enumera actores y malware contextuales, identifica incertidumbres y responde directamente a la pregunta sobre contexto CTI adicional.\\
+		\textbf{Total:} 10/12
+		
+		
+		\subsection*{Relación con actores}
+		
+		\textbf{Respuesta de Lily}
+		\begin{small}
+			
+			\begin{tcolorbox}[
+				breakable,
+				colback=gray!3,
+				colframe=gray!50
+				]
+				
+				Yes, based on the provided context, IP address \texttt{62.211.188.248} is explicitly associated with the threat actor \texttt{thegentlemen}. The OpenCTI intelligence indicates that this IP address has been detected as aggressive and malicious in Italy with a confidence score of 100.
+				
+				Additionally, some contextual CTI information suggests the existence of another threat actor named \texttt{incransom}, but no explicit association is mentioned between \texttt{62.211.188.248} and this particular actor.
+				
+				Looking back at the provided context, only \texttt{thegentlemen} can be attributed as the actor associated with IP address \texttt{62.211.188.248}.
+				
+			\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona el indicador explícito 62.211.188.248, pero no recoge los atributos relevantes del indicador como Type IPv4-Addr, Status Active, Confidence 100, Score 50, Detection False, patrón STIX, fuente AbuseIPDB o descripción de IP maliciosa; al ser una pregunta centrada en atribución, esta omisión es menos grave, pero sigue siendo parcial.\\
+		\textbf{¿Muestra bien el estado y confidence?} 0/2 - No menciona el estado Active ni la Confidence 100 del indicador, ni tampoco el abuseConfidenceScore 100 o el Score 50 presentes en el contexto.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 1/2 - Menciona uno de los actores inferidos, thegentlemen, pero ignora incransom y no explica correctamente que ambos proceden de búsqueda por similitud semántica; además trata thegentlemen como atribución cuando el contexto solo lo presenta como información inferida.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 0/2 - Mezcla relación débil con relación fuerte: afirma que existe atribución de thegentlemen a la IP, cuando el contexto únicamente indica que thegentlemen e incransom son contexto inferido por similitud, no relaciones confirmadas ni atribución explícita.\\
+		\textbf{¿Alucina?} 0/2 - Sí, alucina de forma relevante al afirmar una atribución confirmada a thegentlemen que no está soportada por el contexto; además omite el segundo actor inferido incransom y cambia “thegentlemen” por “thegentleman” al final.\\
+		\textbf{¿Es útil para análisis?} 0/2 - No es útil para análisis porque responde incorrectamente a la pregunta principal de atribución: debería haber indicado que no hay atribución confirmada a ningún actor y que thegentlemen e incransom aparecen solo como contexto inferido no confirmado.\\
+		\textbf{Total:} 2/12.\\
+		
+		\textbf{Respuesta de CyberOSS}
+		\begin{small}
+			\begin{tcolorbox} [
+				breakable,
+				colback=gray!3,
+				colframe=gray!50
+				]
+				\shorthandoff{"} % Previene conflictos con las comillas dobles en inglés o formatos de fecha
+				
+				\subsubsection*{1. Explicit Indicators and Facts Extracted}
+				
+				\begin{description}
+					\item[IOC Value:] \texttt{62.211.188.248} (IPv4 address)
+					\item[Status:] Revoked
+					\item[Confidence:] 100\%
+					\item[Score:] 20
+					\item[Detection:] False
+					\item[Pattern:] \texttt{ipv4-addr:value = '62.211.188.248'}
+					\item[Description:] Recognized as an aggressive malicious IP on AbuseIPDB, with country code \textbf{IT} (Italy). Last reported on \textbf{2026-05-09}.
+					\item[Validity Period:] From \textbf{2026-05-05} to \textbf{2026-06-06}.
+					\item[Source Organization:] AbuseIPDB
+					\item[Marking:] TLP:CLEAR
+					\item[External Reference:] AbuseIPDB database URL
+				\end{description}
+				
+				\subsubsection*{2. CTI Entities Mentioned}
+				
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm} p{3.5cm} X}
+					\toprule
+					Entity Type & Identifier & Description / Details \\
+					\midrule
+					Threat Actor & \texttt{thegentlemen} & No description available; created 2026-02-18. \\
+					& \texttt{incransom} & No description available; created 2026-02-18. \\
+					& \texttt{anubis} & No description available; created 2026-02-18. \\
+					& \texttt{bravox} & No description available; created 2026-02-18. \\
+					& \texttt{lapsus\$} & No description available; created 2026-03-01. \\
+					\midrule
+					Malware & \texttt{NanHaiShu} & Whitepaper describes it as targeting government and private-sector organizations. \\
+					& \texttt{PlugX} & Detailed TTPs include Msiexec, Drive-by Compromise, Spearphishing Link, Web Protocols, DLL Search Order Hijacking, PowerShell, etc. \\
+					& \texttt{LP-Notes} & No description available. \\
+					\midrule
+					Report / Contextual & Similarity-based & IDs such as \texttt{01ec22a8-5a4e-4a69-a1ad-297792ee17a8} link the \\
+					Information & CTI entries & above threat actors and malware as contextual information. \\
+					\bottomrule
+				\end{tabularx}
+				
+				\subsubsection*{3. Relationships and Uncertainties}
+				
+				\phantomsection
+				\paragraph*{Explicit Relationships}
+				
+				\begin{itemize}
+					\item The IOC \texttt{62.211.188.248} is explicitly linked to AbuseIPDB as a malicious IP, with status ``Revoked'' and confidence 100\%.
+					\item The contextual CTI entries list several threat actors and malware families, but none directly reference the IP address.
+				\end{itemize}
+				
+				\phantomsection
+				\paragraph*{Uncertain / Missing Relationships}
+				
+				\begin{itemize}
+					\item No direct attribution of the IP \texttt{62.211.188.248} to any of the listed threat actors (\texttt{thegentlemen}, \texttt{incransom}, \texttt{anubis}, \texttt{bravox}, \texttt{lapsus\$}) is provided.
+					\item No explicit link between the IP and the malware families (\texttt{NanHaiShu}, \texttt{PlugX}, \texttt{LP-Notes}) is provided.
+					\item The similarity-based CTI provides background on actors and malware but does not confirm that they used or operated from this specific IP.
+				\end{itemize}
+				
+				\subsubsection*{4. Final Answer}
+				
+				\textbf{Is the IP address \texttt{62.211.188.248} attributed to any actor according to the context?}
+				
+				No. The provided context identifies the IP as malicious on AbuseIPDB but does \textbf{not} associate it with any of the listed threat actors or malware. Therefore, based on the available information, the IP is not attributed to any specific actor.
+				
+				\shorthandon{"} % Reactiva los shorthands de babel
+			\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 y recoge sus atributos principales, aunque para esta pregunta el indicador explícito es secundario frente a la atribución a actores.\\
+		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Active, Confidence 100, Score 50, Detection False, fuente AbuseIPDB, país IT, lastReportedAt, periodo de validez y referencia externa; aunque este criterio no es central para una pregunta de atribución, la respuesta lo cubre adecuadamente.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom y explica que proceden de la sección de similitud semántica, sin tratarlos como evidencia directa.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa de forma muy clara la relación fuerte/confirmada entre la IP y AbuseIPDB de la relación débil/inferida con los threat actors, indicando explícitamente que no hay atribución confirmada a ningún actor.\\
+		\textbf{¿Alucina?} 2/2 - No alucina atribución ni relación actor-IP; al contrario, corrige adecuadamente la posible confusión y mantiene la incertidumbre donde corresponde.\\
+		\textbf{¿Es útil para análisis?} 2/2 - Es muy útil para análisis de atribución porque responde directamente a la pregunta principal, identifica que no existe atribución confirmada, menciona los actores inferidos, aclara que su relación es solo contextual y evita convertir similitud semántica en evidencia.\\
+		\textbf{Total:} 12/12.\\
+		
+		
+		\subsection*{Separación entre información confirmada e inferida}
+		
+		\textbf{Respuesta de Lily}
+		\begin{small}
+			\begin{tcolorbox}[
+				breakable,
+				colback=gray!3,
+				colframe=gray!50
+				]
+				\shorthandoff{"} % Desactivación preventiva para evitar el colapso de caracteres ingleses
+				
+				\subsubsection*{1. Explicit Indicators and Facts Extracted from the Context}
+				
+				\phantomsection
+				\paragraph*{Indicators explicitly associated with the IOC \texttt{officeonlaine.com}}
+				
+				\begin{description}
+					\item[1.] The domain name \texttt{officeonlaine.com} has been revoked.
+					\item[2.] The URL \url{http://officeonlaine.com/up/update.exe} associated with the IOC has also been revoked.
+					\item[3.] Both indicators are marked as \texttt{Revoked} and have a confidence of 100.
+					\item[4.] The validity period for both indicators is specified, indicating that they were marked as revoked on certain dates in 2025.
+					\item[5.] The source organization for the indicators is listed as iSight.
+					\item[6.] Both indicators have a marking of TLP:CLEAR, suggesting that they are considered open-source intelligence.
+					\item[7.] The external references provided with each indicator include links to MISP events, which likely contain more contextual information about the IOC and its associated threat actors.
+				\end{description}
+				
+				\subsubsection*{2. Information Inferred from Semantic Similarity Search}
+				
+				\begin{description}
+					\item[1.] Two threat actor names are mentioned: \texttt{thegentlemen} and \texttt{incransom}. However, no further details or descriptions of these individuals are provided.
+					\item[2.] The creation timestamps for each threat actor are stated as \texttt{2026-02-18T18:14:10.980Z} for \texttt{thegentlemen} and \texttt{2026-02-18T18:14:08.911Z} for \texttt{incransom}.
+					\item[3.] The semantic similarity search results likely contain additional contextual information about the IOC, but it is not explicitly stated what that context entails.
+				\end{description}
+				
+				\subsubsection*{Summary}
+				
+				In summary, OpenCTI provides concrete confirmation of the revocation status and validity period for the domain name \texttt{officeonlaine.com} and the URL \url{http://officeonlaine.com/up/update.exe} associated with it. The semantic similarity search results provide inferred information about two threat actor names but lack specific context regarding the IOC.
+				
+				\shorthandon{"} % Restauración segura de los shorthands en español
+			\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales: officeonlaine.com y http://officeonlaine.com/up/update.exe, e identifica que ambos están relacionados con el IOC en OpenCTI.\\
+		\textbf{¿Muestra bien el estado y confidence?} 1/2 - Menciona correctamente que ambos indicadores están Revoked, pero omite la Confidence 100, el Score 60 del dominio, el Score 30 de la URL y Detection: True; por tanto, cubre el estado pero no todos los atributos de confianza y puntuación.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos thegentlemen e incransom y aclara que proceden del contexto CTI contextual, sin tratarlos como información confirmada.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa correctamente la información confirmada en OpenCTI de la información inferida por similitud, indicando que no hay confirmación explícita de relación entre los threat actors y officeonlaine.com.\\
+		\textbf{¿Alucina?} 2/2 - No inventa atribuciones ni relaciones no soportadas; la respuesta se mantiene dentro del contexto y expresa correctamente la incertidumbre sobre los actores inferidos.\\
+		\textbf{¿Es útil para análisis?} 2/2 - Es útil para análisis porque responde exactamente a la pregunta, distingue confirmed vs inferred, lista los indicadores confirmados, menciona la fuente iSight, TLP:CLEAR, periodos de validez, referencias externas y contextualiza correctamente que los actores inferidos no deben tratarse como atribución confirmada.\\
+		\textbf{Total:} 11/12.\\
+		
+		\textbf{Respuesta de CyberOSS}
+		\begin{small}
+			\begin{tcolorbox}[
+				breakable,
+				colback=gray!3,
+				colframe=gray!50,
+				fonttitle=\bfseries
+				]
+				\shorthandoff{"} % Previene conflictos con las comillas dobles en inglés o formatos de fecha
+				
+				\subsubsection*{1. Explicit Indicators and Facts Extracted from the Context}
+				
+				\phantomsection
+				\paragraph*{Indicators explicitly associated with the IOC \texttt{officeonlaine.com}}
+				
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm} p{2.2cm} p{2cm} p{1.8cm} X}
+					\toprule
+					\textbf{Indicator} & \textbf{Type} & \textbf{Status} & \textbf{Confidence} & \textbf{Details} \\
+					\midrule
+					\texttt{officeonlaine.com} 
+					& Domain-Name 
+					& Revoked 
+					& 100 
+					& Score: 60; Detection: True; Pattern: \texttt{[domain-name:value = 'officeonlaine.com']}; Description: Red Kontos; Validity: 2025-01-16T17:11:19.000Z to 2025-11-12T17:11:19.000Z; Source: iSight; Marking: TLP:CLEAR; External references: MISP event ``ROBORAT Malware Targets Think Tanks...'' and MISP event ``The Lowdown...''. \\
+					\hline
+					\texttt{http://officeonlaine.com/up/update.exe} 
+					& URL 
+					& Revoked 
+					& 100 
+					& Score: 30; Detection: True; Pattern: \texttt{[url:value = 'http://officeonlaine.com/up/update.exe']}; Description: Red Kontos; Validity: 2025-01-16T16:54:49.000Z to 2025-03-04T16:54:49.000Z; Source: iSight; Marking: TLP:CLEAR; External reference: MISP event ``ROBORAT Malware Targets Think Tanks...''. \\
+					\bottomrule
+				\end{tabularx}
+				
+				\phantomsection
+				\paragraph*{Key explicit facts}
+				
+				\begin{itemize}
+					\item The domain \texttt{officeonlaine.com} is listed as a \textbf{revoked} domain-name indicator.
+					\item A specific URL, \url{http://officeonlaine.com/up/update.exe}, is listed as a \textbf{revoked} URL indicator.
+					\item Both indicators have \textbf{100\% confidence} and are marked as \textbf{detected}.
+					\item They are attributed to the \textbf{Red Kontos} campaign.
+					\item The indicators are valid from \textbf{16 January 2025} until \textbf{12 November 2025} for the domain and \textbf{4 March 2025} for the URL.
+					\item The source organization is \textbf{iSight} and the marking is \textbf{TLP:CLEAR}.
+					\item External references point to two MISP events: the ROBORAT malware campaign and ``The Lowdown'' from April 2018.
+				\end{itemize}
+				
+				\subsubsection*{2. CTI Entities Mentioned in the Context}
+				
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabularx}{\textwidth}{>{\bfseries}p{3cm} p{2.7cm} X X}
+					\toprule
+					\textbf{Entity} & \textbf{Type} & \textbf{Description / Role} & \textbf{Relationship to \texttt{officeonlaine.com}} \\
+					\midrule
+					Red Kontos 
+					& Campaign / Actor 
+					& The campaign that uses the domain and URL. 
+					& Directly linked to both indicators, domain and URL. \\
+					\hline
+					ROBORAT 
+					& Malware 
+					& Targets think-tanks, human-rights groups, diplomacy and hospitality; suspected Kazakhstan nexus. 
+					& Cited in the external reference for the domain indicator. \\
+					\hline
+					The Lowdown 
+					& Report / Event 
+					& A 2018 MISP event describing cyber operations. 
+					& Cited in the external reference for the domain indicator. \\
+					\hline
+					iSight 
+					& Organization 
+					& Provides the indicator data. 
+					& Source of both indicators. \\
+					\hline
+					TLP:CLEAR 
+					& Marking 
+					& Traffic Light Protocol marking indicating public sharing. 
+					& Applied to both indicators. \\
+					\hline
+					MISP 
+					& Platform 
+					& The platform where the external references are hosted. 
+					& Hosts the two cited events. \\
+					\hline
+					Threat actors 
+					& Inferred Actors 
+					& \texttt{thegentlemen}, \texttt{incransom}, \texttt{safepay}, \texttt{osiris}, \texttt{morpheus}; no descriptions or TTPs provided. 
+					& Listed under contextual CTI information inferred from similarity; no explicit link. \\
+					\hline
+					Malware families 
+					& Inferred Malware 
+					& \texttt{PlugX}, \texttt{ZeroT}, \texttt{LP-Notes}. 
+					& No explicit link to \texttt{officeonlaine.com}. \\
+					\bottomrule
+				\end{tabularx}
+				
+				\subsubsection*{3. Confirmed vs. Inferred Information about \texttt{officeonlaine.com}}
+				
+				\renewcommand{\arraystretch}{1.25}
+				\begin{tabularx}{\textwidth}{>{\bfseries}p{4cm} X X}
+					\toprule
+					\textbf{Aspect} & \textbf{Confirmed in OpenCTI} & \textbf{Inferred / Uncertain} \\
+					\midrule
+					Domain name 
+					& Yes. Listed as a revoked domain indicator with full metadata. 
+					& -- \\
+					\hline
+					Associated URL 
+					& Yes. Listed as a revoked URL indicator with full metadata. 
+					& -- \\
+					\hline
+					Campaign / Threat-actor 
+					& Yes. Both indicators are attributed to the \textbf{Red Kontos} campaign. 
+					& -- \\
+					\hline
+					Malware used 
+					& Yes. The domain is linked to \textbf{ROBORAT} malware via external reference. 
+					& No direct evidence that \texttt{officeonlaine.com} hosts or delivers the malware; the link is indirect through the external reference. \\
+					\hline
+					Target sectors 
+					& Yes. The external reference describes the sectors targeted by the associated malware: think-tanks, human-rights, diplomacy and hospitality. 
+					& No direct evidence that \texttt{officeonlaine.com} itself targets those sectors. \\
+					\hline
+					Geopolitical nexus 
+					& Yes. The external reference mentions a suspected \textbf{Kazakhstan nexus} for the campaign. 
+					& No direct evidence tying the domain itself to Kazakhstan. \\
+					\hline
+					Temporal validity 
+					& Yes. Explicit ``valid from'' and ``valid until'' timestamps are provided for both indicators. 
+					& -- \\
+					\hline
+					Source organization 
+					& Yes. \textbf{iSight} is the source of the indicators. 
+					& -- \\
+					\hline
+					Marking 
+					& Yes. \textbf{TLP:CLEAR} is applied. 
+					& -- \\
+					\hline
+					Other threat actors / malware 
+					& No. Entities such as Thegentlemen, PlugX and ZeroT are listed only in the inferred section and are not linked to the domain. 
+					& Inferred only; no direct relationship. \\
+					\bottomrule
+				\end{tabularx}
+				
+				\subsubsection*{4. Summary of Relationships}
+				
+				\phantomsection
+				\paragraph*{Confirmed relationships}
+				
+				\begin{itemize}
+					\item The domain and URL are directly tied to the \textbf{Red Kontos} campaign, with full indicator metadata such as status, confidence, validity, source and marking.
+					\item The external references connect the campaign to \textbf{ROBORAT} malware and the ``The Lowdown'' report, establishing an indirect but documented link to the malware's targeting profile and geopolitical context.
+				\end{itemize}
+				
+				\phantomsection
+				\paragraph*{Uncertain / inferred relationships}
+				
+				\begin{itemize}
+					\item No explicit evidence shows that \texttt{officeonlaine.com} itself hosts or distributes the \textbf{ROBORAT} malware.
+					\item No explicit evidence shows that \texttt{officeonlaine.com} directly targets the listed sectors.
+					\item The other threat actors and malware, such as Thegentlemen, PlugX and ZeroT, appear only in the similarity-based inferred section and have no explicit connection to the domain.
+				\end{itemize}
+				
+				\subsubsection*{5. Final Answer}
+				
+				\phantomsection
+				\paragraph*{Confirmed in OpenCTI}
+				
+				\begin{itemize}
+					\item The domain \texttt{officeonlaine.com} and the URL \url{http://officeonlaine.com/up/update.exe} are revoked indicators with 100\% confidence.
+					\item Both indicators are attributed to the \textbf{Red Kontos} campaign.
+					\item The domain indicator is valid from 16 January 2025 to 12 November 2025, while the URL indicator is valid until 4 March 2025.
+					\item The source organization is \textbf{iSight}, and the indicators are marked \textbf{TLP:CLEAR}.
+					\item External references link the campaign to \textbf{ROBORAT} malware and the ``The Lowdown'' report, indicating targeting of think-tanks, human-rights groups, diplomacy and hospitality sectors, with a suspected Kazakhstan nexus.
+				\end{itemize}
+				
+				\phantomsection
+				\paragraph*{Inferred / Uncertain}
+				
+				\begin{itemize}
+					\item There is no direct evidence that \texttt{officeonlaine.com} itself hosts or delivers the \textbf{ROBORAT} malware; the link is indirect via the external reference.
+					\item The domain's role in targeting the specific sectors or its geopolitical nexus is inferred from the external references, not directly observed.
+					\item Other threat actors and malware listed in the similarity-based section, such as Thegentlemen, PlugX and ZeroT, have no explicit relationship to \texttt{officeonlaine.com}.
+				\end{itemize}
+				
+			\end{tcolorbox}
+		\end{small}
+		
+		\vspace{0.5cm}
+		{\large \textbf{Valoración}}\\
+		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales, officeonlaine.com y http://officeonlaine.com/up/update.exe, incluyendo sus patrones, estados, confidence, score, detection, periodos de validez, fuente, marking y referencias externas.\\
+		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que ambos indicadores están Revoked y con Confidence 100; también recoge Score 60 para el dominio, Score 30 para la URL y Detection True en ambos casos.\\
+		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de similarity search y aclara que no hay evidencia directa que los vincule al dominio o a la URL.\\
+		\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Separa bien la relación débil de los threat actors inferidos, pero sobrefortalece algunas relaciones derivadas de referencias externas: trata ROBORAT/campaign e “infraestructura usada por la campaña” como algo prácticamente confirmado, cuando el contexto solo muestra referencias externas relacionadas y no una relación analítica explícita completa sobre el rol operacional del dominio y la URL.\\
+		\textbf{¿Alucina?} 1/2 - No inventa una atribución a thegentlemen o incransom, pero sí introduce inferencias algo fuertes al afirmar que la campaña está identificada como ROBORAT, que el dominio y la URL pertenecen a una única campaña y que update.exe sugiere un payload malicioso; esas inferencias son plausibles por las referencias, pero no están plenamente confirmadas por el contexto proporcionado.\\
+		\textbf{¿Es útil para análisis?} 2/2 - Es útil para análisis porque responde directamente a la pregunta, estructura confirmed vs inferred, enumera los indicadores explícitos, menciona los actores inferidos y marca incertidumbres; aun con alguna sobreinterpretación, ofrece una visión analítica rica y accionable.\\
+		\textbf{Total:} 10/12.
+
+
 
 
 \newpage
