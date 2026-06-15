@@ -770,3 +770,85 @@ build final context construye el bloque de contexto final. El el Listado 2 se pu
 ver dos ejemplos de contexto recuperado y devuelto a la pipeline, tanto grande como
 peque˜no para el indicador conocido ’officeonlaine.com’
 
+Para comprobar el rendimiento real del sistema bajo restricciones de hardware (ejecuci´on
+exclusiva en CPU y memoria RAM), se realizaron pruebas emp´ıricas basadas en siete
+tipos de consultas. Las respuestas de los modelos se evaluaron mediante una r´ubrica
+cualitativa de seis criterios t´ecnicos, puntuados de 0 a 2. Todos los volcados de las
+conversaciones y el desglose de estas calificaciones se encuentran detallados en el Anexo
+C. Evaluaci´on de modelos.
+A nivel cuantitativo, los tiempos de inferencia se resumen en la Tabla 9. Como era de
+esperar, el modelo Lily (7B) resulta mucho m´as r´apido, con una media de 01:34,5 por
+respuesta, frente a los 03:07,2 de CyberOSS (20B). Este resultado responde a un hecho
+f´ısico evidente en entornos on-premise: al no contar con aceleraci´on por GPU, el factor
+limitante es la velocidad de la memoria RAM para leer los pesos del modelo. Al ser el
+archivo de CyberOSS cuatro veces m´as pesado que el de Lily, la transferencia de datos
+ralentiza notablemente la velocidad de generaci´on, un coste que el analista debe valorar
+a cambio de una mayor capacidad de an´alisis.
+En el plano cualitativo, los resultados recogidos en la Tabla 8 confirman una m´axima
+conocida en el ´ambito de los Grandes Modelos de Lenguaje: un modelo es tan bueno
+como su entrenamiento previo y el contexto que se le proporciona. Aqu´ı, CyberOSS
+(20B) demostr´o una consistencia superior gracias a su mayor tama˜no y a un ajuste fino
+m´as robusto.
+Esta diferencia se observa claramente en las consultas de datos fijos individuales, como
+la ”Pregunta sobre dominio conocido”(Tabla 1), ”Pregunta sobre IP conocida”(Tabla 2)
+y ”Pregunta sobre hash conocido”(Tabla 3). CyberOSS obtuvo las puntuaciones m´as
+altas al procesar el contexto sin problemas y estructurar la informaci´on de OpenCTI
+de forma clara. En cambio, Lily se vio penalizado en las Tablas 1 y 3. Esto ocurri´o
+porque, al configurarse con un perfil de contexto m´as reducido (small), la falta de datos
+suficientes provoc´o que el modelo recurriera a recomendaciones gen´ericas y respuestas
+est´andar en lugar de ofrecer datos espec´ıficos del caso.
+Por otro lado, las pruebas tambi´en reflejan otro comportamiento habitual en los LLM:
+funcionan mucho mejor cuando se les piden tareas concretas y bien dirigidas, en lugar
+de peticiones generales. El ejemplo m´as claro se da al comparar la ”Pregunta sobre IP
+conocida”(Tabla 2) con la ”Pregunta abierta”(Tabla 7). A pesar de trabajar sobre el
+mismo indicador y con el mismo volumen de datos, Lily mejor´o su puntuaci´on de 7 a 11
+puntos en la pregunta abierta. La raz´on es que la instrucci´on de la Tabla le ordenaba
+una tarea muy espec´ıfica (”Summarize information about...”), lo que ayud´o al modelo
+de menor capacidad a estructurar la respuesta y a separar de forma clara los datos
+reales del contexto de sus propias conclusiones, sacando un 11 aun siendo un modelo
+peque˜no (misma puntuaci´on que CyberOSS), frente a un 7 al preguntar por IP.
+Esta dependencia del contexto y del guiado se hizo a´un m´as evidente en la prueba de
+Relaci´on con actores”(Tabla 5). Al enfrentarse a una consulta compleja, Lily cometi´o un
+error cl´asico de los modelos peque˜nos: al ver nombres de atacantes dentro del contexto
+recuperado, asumi´o por simple proximidad que exist´ıa una relaci´on directa y confirmada,
+cayendo en una alucinaci´on anal´ıtica. Por el contrario, CyberOSS demostr´o un mejor
+entrenamiento al identificar correctamente que, seg´un las directrices del sistema y los
+datos de ChromaDB, no hab´ıa ninguna prueba expl´ıcita de vinculaci´on, clasificando la
+relaci´on como una mera posibilidad te´orica.
+Finalmente, en la pregunta sobre ”Contexto inferido” (Tabla 4) se aprecia c´omo impacta
+la densidad del contexto en modelos de diferente escala. Ante una consulta que inyecta un
+volumen masivo de indicadores y reportes secundarios de OpenCTI, la atenci´on de Lily
+se satura por completo, haci´endole ignorar elementos clave de la consulta y desplomando
+su nota a un 4/12. En cambio, CyberOSS demuestra su resiliencia y capacidad de
+procesamiento manteniendo un s´olido 10/12 en la Tabla 4. Aunque el modelo de 20B
+par´ametros asume de forma un poco r´ıgida que no hay m´as informaci´on relevante debido
+al ruido de los datos secundarios, su entrenamiento le permite discriminar el contexto e
+impedir que la sobrecarga de informaci´on degrade su calidad anal´ıtica de forma dr´astica
+como le ocurre al modelo ligero.
+En conclusi´on, la evaluaci´on comparativa revela un claro balance t´ecnico entre coste de
+c´omputo y calidad anal´ıtica: la gran fortaleza de Lily (7B) radica en su velocidad y
+agilidad bajo recursos estrictos de CPU, pero su debilidad es la tendencia a alucinar
+relaciones por proximidad sem´antica ante consultas abstractas o complejas; por el
+contrario, la fortaleza de CyberOSS (20B) es su madurez cognitiva, razonamiento
+l´ogico y resiliencia frente a la ambig¨uedad conceptual, siendo su ´unica debilidad el
+alto tiempo de espera en inferencia debido al volumen de su arquitectura. Desde una
+perspectiva operativa, se recomienda delegar en Lily la clasificaci´on preliminar de alertas,
+el filtrado automatizado de observables y la generaci´on de res´umenes bajo directrices
+muy espec´ıficas, mientras que el uso de CyberOSS debe reservarse para el an´alisis
+forense profundo, la resoluci´on de grafos de atribuci´on de amenazas complejas y la toma
+de decisiones estrat´egicas donde la precisi´on t´ecnica prevalezca sobre la inmediatez de
+la respuesta.
+
+El desarrollo de este proyecto ha permitido diseñar e implementar una arquitectura de asistencia conversacional privada y \textit{on-premise} orientada al análisis de Indicadores de Compromiso (IoCs). A través de la integración de OpenCTI, Open WebUI y ChromaDB, se ha demostrado la viabilidad técnica de construir entornos de Inteligencia Artificial que garantizan la soberanía de los datos corporativos sensibles sin depender de servicios en la nube.
+
+Desde la perspectiva del diseño, el flujo de trabajo modular propuesto ha probado su eficiencia al resolver el desacoplamiento de datos mediante un backend RAG integrado. En esta arquitectura, la base de datos vectorial actúa como un componente de apoyo complementario que trabaja de forma conjunta con la API de OpenCTI; mientras esta última suministra la ciberinteligencia relacional y estructurada, el almacén vectorial asiste al sistema recuperando contexto analítico adyacente bajo demanda. Esta cooperación mitiga las limitaciones de ventana de contexto de los modelos locales sin saturar estáticamente los prompts, confirmando la viabilidad de desplegar una plataforma de ciberinteligencia cohesiva utilizando herramientas de código abierto basadas en el estándar STIX.
+
+En el plano cualitativo, las pruebas empíricas evidencian que el rendimiento del sistema está fuertemente ligado tanto a la escala de parámetros del modelo como a la precisión de las instrucciones suministradas. Mientras que \textit{Lily-Cybersecurity-7B-v0.2} ofrece una agilidad de respuesta óptima para entornos limitados a CPU gracias a su ligereza, presenta debilidades al procesar consultas abstractas. Por el contrario, \textit{CyberOSS-2.0-20B} demuestra una madurez cognitiva superior al discriminar el ruido informativo y contextualizar la incertidumbre, asumiendo un mayor coste de tiempo debido a la inferencia puramente basada en hardware de procesamiento. Asimismo, los resultados confirman que los modelos de menor escala incrementan notablemente su precisión cuando se les guía mediante tareas y comandos concretos frente a peticiones generales. A nivel cuantitativo, las desviaciones típicas extremadamente bajas de ambas arquitecturas constatan la estabilidad y previsibilidad de los motores de inferencia local sobre la CPU.
+
+A partir de las conclusiones extraídas, se definen las siguientes líneas estratégicas de trabajo futuro para la evolución de la plataforma:
+
+En primer lugar, se plantea optimizar la búsqueda semántica en ChromaDB y moderar el contexto entregado a los modelos. Es prioritario desarrollar una capa intermedia que filtre y reorganice la información recuperada, incorporando técnicas de compresión de contexto, algoritmos de \textit{reranking} y filtros condicionados por tipo de observable.
+
+En segundo lugar, se contempla refinar la lógica de recuperación expandiendo el sistema hacia un asistente CTI general que explote de forma nativa las relaciones de OpenCTI. Ello permitirá estructurar grafos relacionales profundos para formular análisis de campañas o perfiles de \textit{threat actors} basados en conocimiento formal. De manera complementaria, se implementará un preprocesamiento mediante un LLM intermedio que clasifique la intención de la consulta antes de la generación final, habilitando el soporte para múltiples IoCs en una sola frase o la identificación de datos ofuscados.
+
+Finalmente, en el plano del despliegue, se avanzará hacia una infraestructura contenerizada completa mediante \textit{Docker Compose}, incorporando mecanismos automatizados para actualizar la base vectorial de forma incremental sin necesidad de regenerar el índice completo por lotes. Asimismo, se añadirán herramientas de logging estructurado para registrar la trazabilidad de los prompts e inyectar un sistema heurístico de citas en la respuesta final del asistente, forzando a los modelos a indicar si una afirmación procede de la ciberinteligencia factual de OpenCTI o del almacenamiento semántico de ChromaDB.

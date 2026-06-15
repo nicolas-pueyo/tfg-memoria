@@ -97,7 +97,6 @@
 \pagenumbering{roman}
 \renewcommand{\contentsname}{Índice}
 \renewcommand{\labelitemi}{$\bullet$}
-\renewcommand{\tablename}{Tabla}
 \renewcommand{\lstlistingname}{Listado}
 \renewcommand{\lstlistlistingname}{Índice de listados}
 
@@ -123,7 +122,7 @@
 
 \fontsize{20pt}{20pt}\selectfont
 \begin{center}
-Inteligencia Artificial On-Premise para el análisis de IoCs con datos privados
+Inteligencia Artificial \textit{On-Premise} para el análisis de IoCs con datos privados
 \end{center}
 
 \vspace*{1cm} 
@@ -169,14 +168,27 @@ ESCUELA DE INGENIERÍA Y ARQUITECTURA\\
 
 \newpage
 \begin{abstract}
-    Aquí irá el abstract cuando acabe de escribir
+	\noindent El presente Trabajo Fin de Grado aborda el diseño, desarrollo e implementación de una plataforma privada y local (\textit{on-premise}) de asistencia conversacional adaptada a la ingeniería de ciberseguridad para el análisis seguro de Indicadores de Compromiso (IoCs). Ante el riesgo de fuga de información corporativa sensible mediante APIs comerciales, se propone una arquitectura modular de código abierto que garantiza la soberanía absoluta de los datos, operando bajo restricciones estrictas de hardware (procesamiento exclusivo por CPU y memoria RAM). La metodología de desarrollo implementada se basa en un sistema de Generación Aumentada por Recuperación (RAG) con un enfoque híbrido de extracción: por un lado, consume de forma automatizada grafos de conocimiento relacionales bajo el estándar STIX 2.1 desde la API de la plataforma de ciberinteligencia \textit{OpenCTI} y, por otro, recupera contexto analítico adyacente mediante búsquedas por similitud semántica en la base de datos vectorial ChromaDB. La interfaz interactiva del analista se gestiona mediante \OpenWebUI, orquestando los flujos a través de su servidor satélite \pipelines\ interconectado con un backend de servicios en \textit{FastAPI}.
+	
+	Los resultados cualitativos y cuantitativos, obtenidos mediante una rúbrica formal de evaluación sobre siete tipologías de consulta, demuestran la viabilidad del sistema y una alta estabilidad en los tiempos de inferencia local administrados por \textit{Ollama}. El análisis comparativo concluye que existe un balance crítico entre coste de cómputo y madurez cognitiva: mientras que el modelo ligero \textit{Lily-Cybersecurity-7B-v0.2} destaca por su velocidad pero muestra debilidades ante la ambigüedad conceptual, \textit{CyberOSS-2.0-20B} exhibe un razonamiento lógico superior para la resolución de grafos de atribución complejos. Finalmente, se establece que el rendimiento de los modelos pequeños se incrementa notablemente al guiar sus tareas mediante comandos concretos en lugar de peticiones generales, validando la utilidad operativa de la plataforma como asistente local en la respuesta automatizada ante incidentes.
+	
+	\vspace{1.5em}
+	\noindent \textbf{Palabras clave:} Inteligencia Artificial, \textit{On-Premise}, RAG, \textit{OpenCTI}, \textit{ChromaDB}, \OpenWebUI, Indicadores de Compromiso (IoC), Ciberseguridad.
 \end{abstract}
 
 \newpage
-\renewcommand{\abstractname}{Abstract}
+\selectlanguage{english}
 \begin{abstract}
-    In English ig
+	\noindent This final degree project presents the design, development, and implementation of a private, on-premise conversational assistance platform tailored for cybersecurity engineering to safely analyze Indicators of Compromise (IoCs). Addressing the risk of sensitive corporate data leakage associated with commercial cloud APIs, we propose a modular open-source architecture that guarantees absolute data sovereignty under strict hardware constraints, relying exclusively on CPU processing and RAM. The implemented methodology is based on a Retrieval-Augmented Generation (RAG) system utilizing a hybrid retrieval approach: it automatically ingests structured relational knowledge graphs under the STIX 2.1 standard from the \textit{OpenCTI} threat intelligence platform API, while concurrently retrieving adjacent analytical context through semantic similarity searches within a local \textit{ChromaDB} vector database. The analyst's interactive frontend is managed by \OpenWebUI, orchestrating data workflows through its satellite server \pipelines\ linked to a \textit{FastAPI} service backend.
+	
+	The qualitative and quantitative results, obtained through a formal evaluation rubric across seven query typologies, demonstrate the system's viability and high stability in local inference latencies managed by \textit{Ollama}. The comparative analysis concludes that a critical trade-off exists between computational cost and technical maturity: while the lightweight \textit{Lily-Cybersecurity-7B-v0.2} model excels in speed, it exhibits weaknesses when dealing with conceptual ambiguity; conversely, \textit{CyberOSS-2.0-20B} displays superior logical reasoning for resolving complex threat attribution graphs. Finally, the findings confirm that smaller-scale models significantly increase their precision when guided by concrete, task-specific commands rather than general queries, validating the platform's operational utility as a local assistant for automated incident response.
+	
+	\vspace{1.5em}
+	\noindent \textbf{Keywords:} Artificial Intelligence, On-Premise, RAG, OpenCTI, ChromaDB, \OpenWebUI, Indicators of Compromise (IoC), Cybersecurity.
 \end{abstract}
+\selectlanguage{spanish}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\listtablename}{Índice de tablas}
 \newpage
 \tableofcontents
 
@@ -299,18 +311,18 @@ Con el propósito de estructurar de forma modular el asistente inteligente, cuya
 \begin{itemize}
     \item \textbf{Motor de inferencia local y selección de modelos:} Para la ejecución de los modelos de lenguaje de gran escala bajo un entorno local, se evaluaron diversas alternativas de motores de inferencia, entre las que destacaron Ollama y vLLM. Si bien vLLM ofrece un rendimiento excepcional en la gestión de solicitudes concurrentes gracias al algoritmo de optimización de memoria \textit{PagedAttention} \cite{kwon2023paged}, su arquitectura está diseñada de manera prioritaria para operar bajo aceleración por hardware gráfico (GPU). Debido a la restricción de infraestructura impuesta en este proyecto, consistente en operar exclusivamente sobre procesamiento por CPU, se seleccionó Ollama como el motor de inferencia local principal. Ollama, desarrollado sobre la biblioteca nativa en C/C++ llama.cpp, proporciona una capa de abstracción eficiente para entornos virtualizados, facilidad de configuración multimodelo mediante archivos de instrucción (\textit{Modelfiles}) y una API local compatible con los estándares de la industria.
 
-    Para posibilitar la interacción con el motor, los modelos de lenguaje se cargan en su versión cuantizada utilizando archivos de extensión \texttt{.gguf}. En cuanto a los modelos de lenguaje seleccionados, se descartaron las opciones generalistas en favor de modelos especializados en ciberseguridad mediante ajuste fino (\textit{fine-tuning}). Esta especialización garantiza que la IA sea capaz de interpretar terminología técnica de ciberinteligencia, correlacionar observables y procesar de manera segura datos potencialmente ofensivos (como volcados de registros o firmas de malware) sin sufrir de bloqueos por políticas de seguridad corporativas comerciales. Con el fin de realizar una evaluación comparativa bajo los recursos asignados al servidor, se seleccionaron dos modelos especializados de escalas de parámetros diferenciadas:
+    Para posibilitar la interacción con el motor, los modelos de lenguaje se cargan en su versión cuantizada utilizando archivos de extensión \texttt{.gguf}. En cuanto a los modelos de lenguaje seleccionados, se descartaron las opciones generalistas en favor de modelos especializados en ciberseguridad mediante \textit{fine-tuning}. Esta especialización garantiza que la IA sea capaz de interpretar terminología técnica de ciberinteligencia, correlacionar observables y procesar de manera segura datos potencialmente ofensivos (como volcados de registros o firmas de malware) sin sufrir de bloqueos por políticas de seguridad corporativas comerciales. Con el fin de realizar una evaluación comparativa bajo los recursos asignados al servidor, se seleccionaron dos modelos especializados de escalas de parámetros diferenciadas:
     \begin{itemize}
         \item \textbf{Lily-Cybersecurity-7B-v0.2:} Modelo ligero desarrollado por Sego Lily Labs, ajustado sobre la arquitectura de Mistral-7B-Instruct-v0.2 a partir de un conjunto de 22,000 instrucciones de seguridad manuales \cite{segolily2024lily}. En su cuantización a 4 bits, presenta un peso de archivo de aproximadamente 4.37 GB, lo que permite una inferencia ágil y fluida con un consumo mínimo de memoria RAM.
         \item \textbf{CyberOSS-2.0-20B (CyberPal-2.0-20B):} Modelo avanzado de la suite de seguridad de código abierto CyberPal 2.0, ajustado sobre la arquitectura gpt-oss-20b mediante el pipeline de enriquecimiento y trazado de razonamiento técnico \textit{SecKnowledge 2.0} \cite{levi2025toward}. En su cuantización de 4 bits (Q4\_K\_M), el tamaño del archivo asciende a 15.8 GB, demandando un mayor esfuerzo de lectura por parte de la memoria RAM del servidor, pero aportando un análisis conceptual de nivel experto.
     \end{itemize}
 
     La elección de esta pareja de modelos permite someter la herramienta a una validación práctica frente a los benchmarks de referencia de la literatura científica. De acuerdo con el estudio de evaluación integral publicado en "Toward Cybersecurity-Expert Small Language Models" (arXiv:2510.14113) \cite{levi2025toward}, Lily-Cybersecurity-7B-v0.2 obtiene una puntuación promedio de 53.38\% en la resolución de tareas complejas de seguridad y ciberinteligencia, mientras que CyberPal-2.0-20B alcanza una puntuación de 80.33\% en el mismo conjunto de pruebas (CTI-Bench), superando incluso a modelos comerciales cerrados en la correlación de vulnerabilidades e identificación de tácticas.
-    \item \textbf{Interfaz gráfica de usuario y orquestación de flujos (Open WebUI):} Para proporcionar a los analistas de ciberseguridad un entorno visual, accesible e interactivo, se evaluaron diversas plataformas autohospedadas capaces de desplegarse mediante contenedores Docker y configurarse de manera sencilla a través de parámetros de entorno. En una primera fase de diseño, se contempló la implementación de la interfaz \textit{ChatUI} desarrollada por Hugging Face. Sin embargo, este entorno fue descartado debido a incompatibilidades severas en su integración nativa con el motor de inferencia local Ollama. Durante las pruebas de concepto, la ambigüedad en la documentación oficial respecto a su interconexión local propició fallos críticos en el control del estado, tales como la imposibilidad de mapear y listar dinámicamente los modelos de Ollama, y respuestas de los modelos no mostradas en la interfaz.
+    \item \textbf{Interfaz gráfica de usuario y orquestación de flujos (\OpenWebUI{}):} Para proporcionar a los analistas de ciberseguridad un entorno visual, accesible e interactivo, se evaluaron diversas plataformas autohospedadas capaces de desplegarse mediante contenedores Docker y configurarse de manera sencilla a través de parámetros de entorno. En una primera fase de diseño, se contempló la implementación de la interfaz \textit{ChatUI} desarrollada por Hugging Face. Sin embargo, este entorno fue descartado debido a incompatibilidades severas en su integración nativa con el motor de inferencia local Ollama. Durante las pruebas de concepto, la ambigüedad en la documentación oficial respecto a su interconexión local propició fallos críticos en el control del estado, tales como la imposibilidad de mapear y listar dinámicamente los modelos de Ollama, y respuestas de los modelos no mostradas en la interfaz.
 
-    Para solucionar estos inconvenientes, se seleccionó la plataforma \textit{Open WebUI}. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de Ollama, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web \cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \pipelines. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje \cite{pipelines}. Esta capacidad resulta crítica para el alcance de este proyecto, ya que proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
+    Para solucionar estos inconvenientes, se seleccionó la plataforma \OpenWebUI{}. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de Ollama, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web \cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \pipelines. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje \cite{pipelines}. Esta capacidad resulta crítica para el alcance de este proyecto, ya que proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
     
-    \item \textbf{Backend, motor de RAG y pipelines:} Este bloque representa el núcleo diferencial y el valor de desarrollo propio de este proyecto. Mientras que los componentes analizados hasta ahora se basan en el despliegue, parametrización y organización arquitectónica de imágenes de Docker (como Open WebUI o la base de datos vectorial), es en esta capa donde se introduce la lógica personalizada que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad. Aunque se describen como componentes diferenciados, el servidor de \pipelines, el backend de servicios y el motor de RAG operan como un único subsistema lógicamente acoplado debido a su constante cooperación en tiempo real. 
+    \item \textbf{Backend, motor de RAG y pipelines:} Este bloque representa el núcleo diferencial y el valor de desarrollo propio de este proyecto. Mientras que los componentes analizados hasta ahora se basan en el despliegue, parametrización y organización arquitectónica de imágenes de Docker (como \OpenWebUI{} o la base de datos vectorial), es en esta capa donde se introduce la lógica personalizada que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad. Aunque se describen como componentes diferenciados, el servidor de \pipelines, el backend de servicios y el motor de RAG operan como un único subsistema lógicamente acoplado debido a su constante cooperación en tiempo real. 
 
     El flujo de procesamiento de la información se inicia cuando el analista realiza una consulta en la interfaz gráfica que menciona un indicador de compromiso (IoC), momento en el cual la solicitud es interceptada de manera inmediata por el servidor de \textit{middleware Pipelines}. En lugar de transmitir la petición de forma directa al motor de inferencia local, el \textit{pipeline} extrae el \textit{payload} y desvía la solicitud hacia un \textit{endpoint} específico de nuestro backend. Al recibir este paquete, el backend analiza la petición y llama a las funciones del motor de RAG, el cual recupera contexto técnico sobre el indicador consultando de manera estructurada tanto la API de OpenCTI como la base de datos vectorial local (ChromaDB). Una vez obtenido este contexto histórico y relacional, se devuelve en forma de respuesta al \textit{pipeline}, encargado de reformular el \textit{prompt} del usuario inyectando la información recuperada y de transmitir la instrucción final enriquecida al modelo correspondiente para que este realice su razonamiento.
 
@@ -353,7 +365,7 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
     \label{fig:despliegue}
 \end{figure}
 
-\subsection{Workflow del sistema}
+\subsection{\textit{Workflow} del sistema}
    En la Figura~\ref{fig:despliegue} se detalla concretamente la organización del despliegue de todos los artefactos mencionados, así como las comunicaciones que tienen entre ellos. Las comunicaciones se expresan como flechas etiquetadas. Una flecha bidireccional ($\longleftrightarrow$) significa que se manda una \textit{request} y se espera \textit{response} (por ejemplo, la flecha etiquetada con $1$ entre \OpenWebUI y \pipelines, mientras que una flecha en una sola dirección ($\longrightarrow$) significa que simplemente se envían datos en una sola dirección (esto solo se da entre el \textit{ingestor} y \textit{ChromaDB}, etiquetada con $II$).
 
     Una vez definida la distribución lógica y física de la infraestrutura, es fundamental definir la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con \textit{OpenCTI} y \textit{ChromaDB}), cuyas comunicaciones están etiquetadas con números romanos en el la Figura~\ref{fig:despliegue} ($I$ y $II$).
@@ -399,7 +411,7 @@ Tras la fase de normalización, los objetos CTI extraídos desde OpenCTI se encu
 
 El proceso de vectorización consiste en cargar los ficheros \texttt{.jsonl} generados durante la normalización, extraer el campo \texttt{text} de cada documento y convertirlo en un vector numérico mediante el modelo \texttt{sentence-transformers/all-MiniLM-L6-v2}. Este modelo genera una representación densa del significado del texto, de forma que documentos conceptualmente similares quedan próximos dentro del espacio vectorial. En paralelo, también se cargan los ficheros de metadatos asociados a cada colección, comprobando que el número de textos y metadatos coincide antes de generar los embeddings. Esta comprobación es importante para garantizar que cada vector queda asociado al documento y metadatos correctos.
 
-Los embeddings generados se almacenan en ficheros \texttt{.npy}, separados por tipo de entidad. Así, se generan ficheros independientes para \texttt{threat\_actors}, \texttt{malware}, \texttt{attack\_patterns}, \texttt{reports} e \texttt{indicators}. Esta separación permite mantener una organización coherente del corpus CTI y facilita la carga posterior en colecciones diferenciadas dentro de ChromaDB. Además, guardar los embeddings como ficheros NumPy permite reutilizarlos sin necesidad de recalcularlos cada vez que se quiera reconstruir la base vectorial.
+Los embeddings generados se almacenan en ficheros \texttt{.npy}, separados por tipo de entidad. Así, se generan ficheros independientes para \texttt{threat\_actors}, \texttt{malware}, \texttt{attack\_patterns}, \texttt{reports} e \texttt{indicators}. Esta separación permite mantener una organización coherente del corpus CTI y facilita la carga posterior en colecciones diferenciadas dentro de ChromaDB. Además, guardar los embeddings como ficheros \textit{NumPy} permite reutilizarlos sin necesidad de recalcularlos cada vez que se quiera reconstruir la base vectorial.
 
 Una vez generados los embeddings, el siguiente paso consiste en cargarlos en ChromaDB. Para ello, el script de inserción se conecta al servidor de ChromaDB mediante \texttt{HttpClient}. Para cada tipo de entidad, el script crea o recupera una colección con el mismo nombre de la entidad, por ejemplo \texttt{threat\_actors}, \texttt{malware}, \texttt{attack\_patterns}, \texttt{reports} o \texttt{indicators}. Las colecciones se configuran utilizando similitud coseno, una métrica habitual para comparar embeddings en sistemas de recuperación semántica.
 
@@ -571,206 +583,223 @@ El módulo \texttt{builder.py} se encarga de unir el contexto fuerte extraído d
 %%%%%% Evaluación y discusión de resultados
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Evaluación y discusión de resultados}
+
+Para comprobar el rendimiento real del sistema bajo restricciones de hardware (ejecución exclusiva en CPU y memoria RAM), se realizaron pruebas empíricas basadas en siete tipos de consultas. Las respuestas de los modelos se evaluaron mediante una rúbrica cualitativa de seis criterios técnicos, puntuados de 0 a 2. Todos los volcados de las conversaciones y el desglose de estas calificaciones se encuentran detallados en el \textbf{\textit{\nameref{sec:anexoC}}}.
+
+A nivel cuantitativo, los tiempos de inferencia se resumen en la Tabla~\ref{tab:tiempos}. Como era de esperar, el modelo \textit{Lily} (7B) resulta mucho más rápido, con una media de 01:34,5 por respuesta, frente a los 03:07,2 de CyberOSS (20B). Este resultado responde a un hecho físico evidente en entornos \textit{on-premise}: al no contar con aceleración por GPU, el factor limitante es la velocidad de la memoria RAM para leer los pesos del modelo. Al ser el archivo de \textit{CyberOSS} cuatro veces más pesado que el de \textit{Lily}, la transferencia de datos ralentiza notablemente la velocidad de generación, un coste que el analista debe valorar a cambio de una mayor capacidad de análisis.
+
+Sin embargo, al observar las desviaciones típicas registradas en la Tabla~\ref{tab:tiempos} (0,000361 para \textit{Lily} y 0,000667 para \textit{CyberOSS}), se constata de forma matemática que la dispersión de los tiempos de respuesta no es exagerada en ninguno de los dos casos. Los valores de desviación tan extremadamente bajos indican que el comportamiento de los motores de inferencia local sobre CPU es altamente predecible y estable. No existen picos de retraso anómalos o aleatorios entre consultas pesadas y ligeras; el servidor mantiene una latencia de cómputo uniforme donde el tiempo de ejecución escala de manera directamente proporcional al tamaño del prompt y al número de tokens generados, sin verse penalizado por problemas de concurrencia o degradación térmica del hardware.
+
+En el plano cualitativo, los resultados recogidos en la Tabla~\ref{tab:medias} confirman una máxima conocida en el ámbito de los Grandes Modelos de Lenguaje: un modelo es tan bueno como su entrenamiento previo y el contexto que se le proporciona. Aquí, \textit{CyberOSS} (20B) demostró una consistencia superior gracias a su mayor tamaño y a un ajuste fino más robusto.
+
 % Tabla para el dominio conocido
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 1 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 1 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 0 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
-        \hline
-        ¿Alucina? & 1 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 1 & 2 \\
-        \hline
-        Puntuación & 5 & 11 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados para dominio conocido}
-    \label{tab:dominio}
+\begin{table}[h]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 1 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 1 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 0 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
+		\hline
+		¿Alucina? & 1 & 1 \\
+		\hline
+		¿Es útil para análisis? & 1 & 2 \\
+		\hline
+		Puntuación & 5 & 11 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados para dominio conocido}
+	\label{tab:dominio}
 \end{table}
 
 %Tabla para IP conocida
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 1 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 1 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 2 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
-        \hline
-        ¿Alucina? & 1 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 1 & 2 \\
-        \hline
-        Puntuación & 7 & 11 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados para dirección IP conocida}
-    \label{tab:ip}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 1 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 1 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 2 & 1\\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 1 & 1\\
+		\hline
+		¿Alucina? & 1 & 2 \\
+		\hline
+		¿Es útil para análisis? & 1 & 1 \\
+		\hline
+		Puntuación & 7 & 9 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados para dirección IP conocida}
+	\label{tab:ip}
 \end{table}
 
 % Tabla para hash conocido
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 2 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 2 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 0 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
-        \hline
-        ¿Alucina? & 2 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 1 & 2 \\
-        \hline
-        Puntuación & 8 & 11 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados para hash conocido}
-    \label{tab:hash}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 2 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 2 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 0 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
+		\hline
+		¿Alucina? & 2 & 1 \\
+		\hline
+		¿Es útil para análisis? & 1 & 2 \\
+		\hline
+		Puntuación & 8 & 11 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados para hash conocido}
+	\label{tab:hash}
 \end{table}
 
 % Tabla para pregunta por contexto inferido
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 1 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 0 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 1 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 0 & 1 \\
-        \hline
-        ¿Alucina? & 1 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 1 & 2 \\
-        \hline
-        Puntuación & 4 & 10 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados para pregunta por contexto inferido}
-    \label{tab:contexto}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 1 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 0 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 1 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 0 & 1 \\
+		\hline
+		¿Alucina? & 1 & 1 \\
+		\hline
+		¿Es útil para análisis? & 1 & 2 \\
+		\hline
+		Puntuación & 4 & 10 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados para pregunta por contexto inferido}
+	\label{tab:contexto}
 \end{table}
 
+Esta diferencia se observa claramente en las consultas de datos fijos individuales, como la "Pregunta sobre dominio conocido" (Tabla~\ref{tab:dominio}), "Pregunta sobre IP conocida" (Tabla~\ref{tab:ip}) y "Pregunta sobre hash conocido" (Tabla~\ref{tab:hash}). \textit{CyberOSS} obtuvo las puntuaciones más altas al procesar el contexto sin problemas y estructurar la información de \textit{OpenCTI} de forma clara. En cambio, \textit{Lily} se vio penalizado en las Tablas 1 y 3. Esto ocurrió porque, al configurarse con un perfil de contexto más reducido (\textit{small}), la falta de datos suficientes provocó que el modelo recurriera a recomendaciones genéricas y respuestas estándar en lugar de ofrecer datos específicos del caso.
+
+Por otro lado, las pruebas también reflejan otro comportamiento habitual en los LLM: funcionan mucho mejor cuando se les piden tareas concretas y bien dirigidas, en lugar de peticiones generales. El ejemplo más claro se da al comparar la "Pregunta sobre IP conocida" (Tabla~\ref{tab:ip}) con la "Pregunta abierta" (Tabla~\ref{tab:abierta}). A pesar de trabajar sobre el mismo indicador y con el mismo volumen de datos, Lily mejoró su puntuación de 7 a 11 puntos en la pregunta abierta. La razón es que la instrucción de la Tabla le ordenaba una tarea más específica ("Summarize information about..."), lo que ayudó al modelo de menor capacidad a estructurar la respuesta y a separar de forma clara los datos reales del contexto de sus propias conclusiones, sacando un 11 aun siendo un modelo pequeño (misma puntuación que CyberOSS), frente a un 7 al preguntar por IP.
+
 % Tabla de relación con actores
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 1 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 0 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 1 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 0 & 2 \\
-        \hline
-        ¿Alucina? & 0 & 2 \\
-        \hline
-        ¿Es útil para análisis? & 0 & 2 \\
-        \hline
-        Puntuación & 2 & 12 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados de relación con actores}
-    \label{tab:actores}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 1 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 0 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 1 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 0 & 2 \\
+		\hline
+		¿Alucina? & 0 & 2 \\
+		\hline
+		¿Es útil para análisis? & 0 & 2 \\
+		\hline
+		Puntuación & 2 & 12 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados de relación con actores}
+	\label{tab:actores}
 \end{table}
 
 % Tabla para separación fuerte/débil explícita
-\begin{table}[ht]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 2 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 1 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 2 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 2 & 1 \\
-        \hline
-        ¿Alucina? & 2 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 2 & 2 \\
-        \hline
-        Puntuación & 12 & 10 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados de separación fuerte/débil explícita}
-    \label{tab:fuerte_debil}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 2 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 1 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 2 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 2 & 1 \\
+		\hline
+		¿Alucina? & 2 & 1 \\
+		\hline
+		¿Es útil para análisis? & 2 & 2 \\
+		\hline
+		Puntuación & 12 & 10 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados de separación fuerte/débil explícita}
+	\label{tab:fuerte_debil}
 \end{table}
 
 % Tabla para pregunta abierta
-\begin{table}[h!]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        Pregunta & Lily & CyberOSS  \\
-        \hline
-        ¿Menciona indicadores explícitos? & 2 & 2 \\
-        \hline
-        ¿Muestra bien el estado y confidence? & 2 & 2 \\
-        \hline
-        Menciona y separa el contexto inferido & 2 & 2 \\
-        \hline
-        ¿Separa relaciones fuertes y débiles?  & 2 & 2 \\
-        \hline
-        ¿Alucina? & 2 & 1 \\
-        \hline
-        ¿Es útil para análisis? & 2 & 2 \\
-        \hline
-        Puntuación & 11 & 11 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados de pregunta abierta}
-    \label{tab:abierta}
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		Pregunta & Lily & CyberOSS  \\
+		\hline
+		¿Menciona indicadores explícitos? & 2 & 2 \\
+		\hline
+		¿Muestra bien el estado y confidence? & 2 & 2 \\
+		\hline
+		Menciona y separa el contexto inferido & 2 & 2 \\
+		\hline
+		¿Separa relaciones fuertes y débiles?  & 2 & 2 \\
+		\hline
+		¿Alucina? & 2 & 1 \\
+		\hline
+		¿Es útil para análisis? & 2 & 2 \\
+		\hline
+		Puntuación & 11 & 11 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados de pregunta abierta}
+	\label{tab:abierta}
 \end{table}
 
-\begin{table}[h!]
-    \centering
-    \begin{tabular}{||c|c|c||}
-        \hline
-        & Lily & CyberOSS \\
-        \hline
-        Promedio & 6,86 & 10,86 \\
-        \hline
-        Sobre 10 & 5,71& 9,05 \\
-        \hline
-    \end{tabular}
-    \caption{Resultados finales}
-    \label{tab:medias}
+Esta dependencia del contexto y del guiado se hizo aún más evidente en la prueba de "Relación con actores" (Tabla~\ref{tab:actores}). Al enfrentarse a una consulta compleja, Lily cometió un error clásico de los modelos pequeños: al ver nombres de atacantes dentro del contexto recuperado, asumió por simple proximidad que existía una relación directa y confirmada, cayendo en una alucinación analítica. Por el contrario, CyberOSS demostró un mejor entrenamiento al identificar correctamente que, según las directrices del sistema y los datos de ChromaDB, no había ninguna prueba explícita de vinculación, clasificando la relación como una mera posibilidad teórica.
+
+\shorthandoff{"}
+Finalmente, en la pregunta sobre "Contexto inferido" (Tabla~\ref{tab:contexto}) se aprecia cómo impacta la densidad del contexto en modelos de diferente escala. Ante una consulta que inyecta un volumen masivo de indicadores y reportes secundarios de \textit{OpenCTI}, la atención de Lily se satura por completo, haciéndole ignorar elementos clave de la consulta y desplomando su nota a un 4/12. En cambio, CyberOSS demuestra su resiliencia y capacidad de procesamiento manteniendo un sólido 10/12 en la Tabla 4. Aunque el modelo de 20B parámetros asume de forma un poco rígida que no hay más información relevante debido al ruido de los datos secundarios, su entrenamiento le permite discriminar el contexto e impedir que la sobrecarga de información degrade su calidad analítica de forma drástica como le ocurre al modelo ligero.
+\shorthandon{"}
+
+\begin{table}[]
+	\centering
+	\begin{tabular}{||c|c|c||}
+		\hline
+		& Lily & CyberOSS \\
+		\hline
+		Promedio & 6,86 & 10,57 \\
+		\hline
+		Sobre 10 & 5,71& 8,81 \\
+		\hline
+	\end{tabular}
+	\caption{Resultados finales}
+	\label{tab:medias}
 \end{table}
 
-Fragmento de código
-
-\begin{table}[ht]
+\begin{table}[]
 	\centering
 	\begin{tabular}{||c|c|c||}
 		\hline
@@ -808,10 +837,26 @@ Fragmento de código
 	\label{tab:tiempos}
 \end{table}
 
+En conclusión, la evaluación comparativa revela un claro balance técnico entre coste de cómputo y calidad analítica: la gran fortaleza de \textit{Lily} (7B) radica en su velocidad y agilidad bajo recursos estrictos de CPU, pero su debilidad es la tendencia a alucinar relaciones por proximidad semántica ante consultas abstractas o complejas; por el contrario, la fortaleza de \textit{CyberOSS} (20B) es su madurez cognitiva, razonamiento lógico y resiliencia frente a la ambigüedad conceptual, siendo su única debilidad el alto tiempo de espera en inferencia debido al volumen de su arquitectura. Desde una perspectiva operativa, se recomienda delegar en \textit{Lily} la clasificación preliminar de alertas, el filtrado automatizado de observables y la generación de resúmenes bajo directrices muy específicas, mientras que el uso de \textit{CyberOSS} debe reservarse para el análisis forense profundo, la resolución de grafos de atribución de amenazas complejas y la toma de decisiones estratégicas donde la precisión técnica prevalezca sobre la inmediatez de la respuesta.
+
+
 % Así se sustituye el número automáticamente:
 % Como se ve en la Tabla~\ref{tab:dominio}
 \newpage
 \section{Conclusiones y trabajo futuro}
+El desarrollo de este proyecto ha permitido diseñar e implementar una arquitectura de asistencia conversacional privada y \textit{on-premise} orientada al análisis de Indicadores de Compromiso (IoCs). A través de la integración de \textit{OpenCTI}, \OpenWebUI{} y ChromaDB, se ha demostrado la viabilidad técnica de construir entornos de Inteligencia Artificial que garantizan la soberanía de los datos corporativos sensibles sin depender de servicios en la nube.
+
+Desde la perspectiva del diseño, el flujo de trabajo modular propuesto ha probado su eficiencia al resolver el desacoplamiento de datos mediante un backend RAG integrado. En esta arquitectura, la base de datos vectorial actúa como un componente de apoyo complementario que trabaja de forma conjunta con la API de \textit{OpenCTI}; mientras esta última suministra la ciberinteligencia relacional y estructurada, el almacén vectorial asiste al sistema recuperando contexto analítico adyacente bajo demanda. Esta cooperación mitiga las limitaciones de ventana de contexto de los modelos locales sin saturar estáticamente los prompts, confirmando la viabilidad de desplegar una plataforma de ciberinteligencia cohesiva utilizando herramientas de código abierto basadas en el estándar STIX.
+
+En el plano cualitativo, las pruebas empíricas evidencian que el rendimiento del sistema está fuertemente ligado tanto a la escala de parámetros del modelo como a la precisión de las instrucciones suministradas. Mientras que \textit{Lily-Cybersecurity-7B-v0.2} ofrece una agilidad de respuesta óptima para entornos limitados a CPU gracias a su ligereza, presenta debilidades al procesar consultas abstractas. Por el contrario, \textit{CyberOSS-2.0-20B} demuestra una madurez cognitiva superior al discriminar el ruido informativo y contextualizar la incertidumbre, asumiendo un mayor coste de tiempo debido a la inferencia puramente basada en hardware de procesamiento. Asimismo, los resultados confirman que los modelos de menor escala incrementan notablemente su precisión cuando se les guía mediante tareas y comandos concretos frente a peticiones generales. A nivel cuantitativo, las desviaciones típicas extremadamente bajas de ambas arquitecturas constatan la estabilidad y previsibilidad de los motores de inferencia local sobre la CPU.
+
+A partir de las conclusiones extraídas, se definen las siguientes líneas estratégicas de trabajo futuro para la evolución de la plataforma:
+
+En primer lugar, se plantea optimizar la búsqueda semántica en ChromaDB y moderar el contexto entregado a los modelos. Es prioritario desarrollar una capa intermedia que filtre y reorganice la información recuperada, incorporando técnicas de compresión de contexto, algoritmos de \textit{reranking} y filtros condicionados por tipo de observable.
+
+En segundo lugar, se contempla refinar la lógica de recuperación expandiendo el sistema hacia un asistente CTI general que explote de forma nativa las relaciones de \textit{OpenCTI}. Ello permitirá estructurar grafos relacionales profundos para formular análisis de campañas o perfiles de \textit{threat actors} basados en conocimiento formal. De manera complementaria, se implementará un preprocesamiento mediante un LLM intermedio que clasifique la intención de la consulta antes de la generación final, habilitando el soporte para múltiples IoCs en una sola frase o la identificación de datos ofuscados.
+
+Finalmente, en el plano del despliegue, se avanzará hacia una infraestructura contenerizada completa mediante \textit{Docker Compose}, incorporando mecanismos automatizados para actualizar la base vectorial de forma incremental sin necesidad de regenerar el índice completo por lotes. Asimismo, se añadirán herramientas de logging estructurado para registrar la trazabilidad de los prompts e inyectar un sistema heurístico de citas en la respuesta final del asistente, forzando a los modelos a indicar si una afirmación procede de la ciberinteligencia factual de \textit{OpenCTI} o del almacenamiento semántico de ChromaDB.
 
 \newpage
 \addcontentsline{toc}{section}{Anexos}
@@ -824,7 +869,7 @@ Fragmento de código
     \caption{Diagrama de Gantt}
     \label{fig:gantt}
 \end{figure}
-\begin{table}[H]
+\begin{table}[h!]
 	\centering
 	\begin{tabular}{l r}
 		\hline
@@ -986,6 +1031,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona el dominio y la URL asociada, pero no enumera todos los campos relevantes.\\
 \textbf{¿Muestra bien el estado y confidence?} 1/2 - Indica correctamente que el dominio está revoked con confidence 100, y que la URL también está revoked pero en esta no menciona la confidence.\\
 \textbf{¿Menciona y separa el contexto inferido?} 0/2 - No, ignora el contexto inferido.\\
@@ -1106,7 +1152,8 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
-\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona completamente los dos indicadores explícitos principales: el dominio resisterma.com.br y la URL http://resisterma.com.br/RIC/RCH.exe, incluyendo sus tipos, patrones, fuentes, periodos de validez y referencias externas.\\
+\normalsize
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona completamente los dos indicadores explícitos principales: el dominio \texttt{resisterma.com.br} y la URL correspondiente \texttt{http://resisterma.com.br/RIC/RCH.exe}, incluyendo sus tipos, patrones, fuentes, periodos de validez y referencias externas.\\
 \textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que resisterma.com.br está Active con Confidence 100, Score 30 y Detection True, y que la URL http://resisterma.com.br/RIC/RCH.exe está Revoked con Confidence 100, Score 30 y Detection True.\\
 \textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de la sección “Contextual CTI Information (Inferred from Similarity)” y no los presenta como atribución confirmada.\\
 \textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa bien las relaciones explícitas de las relaciones inferidas: identifica la relación técnica directa entre el dominio y la URL porque la URL cuelga del dominio, y aclara que los threat actors son solo contexto por similitud sin evidencia directa de relación.\\
@@ -1135,6 +1182,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 1/2 - El indicador principal es mencionado e identificado como una IP maliciosa de la fuente AbuseIPDB, pero no habla de los factores presentes en el contexto.\\
 \textbf{¿Muestra bien el estado y confidence?} 1/2 - Menciona que tiene una abuse score de 100, pero no menciona la confidence y status de OpenCTI.\\
 \textbf{¿Menciona y separa el contexto inferido?} 2/2 - Sí, los actores adicionales son mencionados como info adicional.\\
@@ -1207,20 +1255,19 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		\subsubsection*{4. Summary}
 		
 		The IP address \textbf{\texttt{85.209.195.160}} is a high-confidence malicious indicator from AbuseIPDB, valid between May and June 2026. It is marked as revoked, indicating it is no longer active. No direct links to threat actors, malware, or campaigns are provided in the context, leaving its broader threat role unclear. Further investigation would be required to determine any additional associations or operational use cases.
-		
-		\text{Ollama} % Restauración del shorthand en español
 	\end{tcolorbox}
 \end{small}
 
 \vspace{0.5cm}
-{\large \textbf{Valoración}}\\
-\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 85.209.195.160 y recoge sus campos principales: tipo IPv4, patrón STIX, descripción, fuente AbuseIPDB, periodo de validez, marking y referencia externa.\\
-\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que el indicador está Active, con Confidence 100, Score 100, Detection False y abuseConfidenceScore 100; además conserva el país DE y la fecha lastReportedAt.\\
-\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de la información contextual CTI y deja claro que no tienen descripción disponible.\\
-\textbf{¿Separa relaciones fuertes y débiles?} 2/2 - Separa adecuadamente la relación fuerte/confirmada entre la IP y AbuseIPDB de la relación débil/inferida con los threat actors; indica explícitamente que no hay evidencia directa que conecte thegentlemen o incransom con la IP y que la asociación procede solo de similitud.\\
-\textbf{¿Alucina?} 1/2 - No inventa atribuciones graves, pero hay una pequeña imprecisión al decir que TLP:CLEAR “indicates the information can be shared publicly without restriction”, que es una interpretación razonable pero algo más normativa que lo expresado literalmente en el contexto; también dice que AbuseIPDB “provides abuse reports and confidence scores”, inferencia lógica pero no estrictamente presente como explicación en el contexto.\\
-\textbf{¿Es útil para análisis?} 2/2 - Es útil para análisis porque estructura el IOC, recoge los atributos técnicos relevantes, identifica la fuente, describe la validez temporal, menciona el contexto inferido y, sobre todo, evita atribuir falsamente la IP a actores al marcar correctamente la incertidumbre.\\
-\textbf{Total:} 11/12.\\
+\large{\textbf{Valoración}}\\
+\normalsize
+\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito principal, \texttt{85.209.195.160}, identificándolo como una dirección IPv4 e incluyendo patrón, descripción AbuseIPDB, fuente, marking, referencias externas y periodo de validez.\\
+\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que el indicador está \texttt{Revoked}, con \texttt{Confidence: 100}, \texttt{Score: 20} y \texttt{Detection: True}. También recoge el país \texttt{DE}, el \texttt{abuseConfidenceScore: 100} y la fecha \texttt{lastReportedAt}.\\
+\textbf{¿Menciona y separa el contexto inferido?} 1/2 - No enumera todos los objetos recuperados por similitud semántica, como \texttt{thegentlemen}, \texttt{incransom}, \texttt{anubis}, \texttt{tengu}, \texttt{osiris}, \texttt{NanHaiShu}, \texttt{PlugX} o \texttt{Kazuar}. Sin embargo, sí deja claro que no hay actores, malware, campañas o técnicas directamente asociados al IOC, por lo que reconoce parcialmente que cualquier contexto adicional no constituye una relación confirmada.\\
+\textbf{¿Separa relaciones fuertes y débiles?} 1/2 - Separa correctamente la relación fuerte entre la IP y AbuseIPDB/MISP como fuente explícita del indicador, pero no desarrolla suficientemente la parte débil o inferida. Debería haber indicado que los actores y malware recuperados por similitud aparecen solo como contexto semántico no confirmado.\\
+\textbf{¿Alucina?} 2/2 - No inventa atribuciones a actores, malware o campañas, y se mantiene prudente al afirmar que no hay relaciones explícitas adicionales. La interpretación de \texttt{Revoked} como indicador revocado se considera aceptable dentro del contexto de OpenCTI y no supone una alucinación relevante.\\
+\textbf{¿Es útil para análisis?} 1/2 - Es útil parcialmente porque resume bien la información explícita del indicador, incluyendo AbuseIPDB, confidence, estado, score, detection, fechas y referencias. No obstante, queda incompleta para análisis CTI porque no aprovecha el contexto inferido disponible ni enumera los objetos recuperados por similitud.\\
+\textbf{Total:} 9/12.\\
 
 
 \textbf{Hash conocido}
@@ -1252,6 +1299,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el hash y el indicador explícito \texttt{URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe} y su hash correspondiente \texttt{684634f51cb07d40e58c88b51c62ff1c83a18b69}.\\
 \textbf{¿Muestra bien el estado y confidence?} 2/2 - Indica correctamente el estado Revoked, la confidence 100, el score 30 y Detection: True.\\
 \textbf{¿Menciona y separa el contexto inferido?} 0/2 - Ignora los threat actors inferidos thegentlemen e incransom y además afirma que no puede determinar información inferida adicional, aunque sí existe una sección de contexto inferido.\\
@@ -1331,6 +1379,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 \end{small}
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona completamente el indicador explícito asociado al hash: URGENT\_QUOTATION\_PR \#270473\_07\_10\_2020.exe 684634f51cb07d40e58c88b51c62ff1c83a18b69, identifica el fichero, el hash SHA-1 y recoge los principales campos del indicador.\\
 \textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Revoked, Confidence: 100, Score: 30 y Detection: True, además del tipo StixFile, el patrón, el periodo de validez, la organización fuente CERT PKO BP y el marking TLP:CLEAR.\\
 \textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de similitud semántica y no los presenta como relaciones confirmadas con el hash o el fichero.\\
@@ -1377,6 +1426,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 y lo identifica como una IP asociada a información confirmada de OpenCTI/AbuseIPDB.\\
 \textbf{¿Muestra bien el estado y confidence?} 2/2 - Indica correctamente que el indicador está Active y que tiene confidence 100; también menciona el abuseConfidenceScore 100, Detection false, lastReportedAt y el periodo de validez.\\
 \textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos thegentlemen e incransom y aclara que proceden de semantic similarity search/contextual CTI information.\\
@@ -1497,6 +1547,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 
 \vspace{0.5cm}
 {\large \textbf{Valoración}}\\
+\normalsize
 \textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 e identifica sus campos principales: tipo IPv4, patrón STIX, descripción AbuseIPDB, fuente, periodo de validez, marking y referencia externa.\\
 \textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Active, Confidence 100, Score 50, Detection False, abuseConfidenceScore 100, countryCode IT y lastReportedAt.\\
 \textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de semantic similarity search y aclara que no están directamente vinculados a la IP en los datos proporcionados.\\
@@ -1527,6 +1578,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona \texttt{officeonlaine.com}, pero no recoge correctamente los dos indicadores explícitos disponibles: el dominio \texttt{officeonlaine.com} y la URL \url{http://officeonlaine.com/up/update.exe}. Tampoco menciona atributos explícitos relevantes como patrón, fuente \texttt{iSight}, descripción \texttt{Red Kontos}, referencias MISP o periodo de validez.\\
 		\textbf{¿Muestra bien el estado y confidence?} 0/2 - No menciona que ambos indicadores están \texttt{Revoked}, ni que tienen \texttt{Confidence: 100}, ni los scores \texttt{60} y \texttt{30}, ni \texttt{Detection: True}.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 1/2 - Menciona \texttt{thegentlemen} e \texttt{incransom}, pero ignora otros elementos inferidos presentes en el contexto, como \texttt{safepay}, \texttt{osiris}, \texttt{morpheus}, \texttt{PlugX}, \texttt{ZeroT} y \texttt{LP-Notes}. Además, dice que los actores están ``associated with this IOC'', lo cual es demasiado fuerte: el contexto solo indica que fueron recuperados por similitud semántica.\\
@@ -1646,6 +1698,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales: \texttt{officeonlaine.com} y la URL \url{http://officeonlaine.com/up/update.exe}, incluyendo tipo, estado, confidence, score, detection, patrón, validez, fuente y referencias externas.\\
 		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Recoge correctamente que ambos indicadores están \texttt{Revoked}, con \texttt{Confidence: 100}, además de los scores \texttt{60} y \texttt{30}, y \texttt{Detection: True}.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos \texttt{thegentlemen}, \texttt{incransom}, \texttt{safepay}, \texttt{osiris} y \texttt{morpheus}, y los malware recuperados por similitud \texttt{PlugX}, \texttt{ZeroT} y \texttt{LP-Notes}; además indica correctamente que no hay enlace explícito con el dominio y que proceden del contexto semántico.\\
@@ -1677,6 +1730,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 1/2 - Menciona el indicador explícito 62.211.188.248, pero no recoge los atributos relevantes del indicador como Type IPv4-Addr, Status Active, Confidence 100, Score 50, Detection False, patrón STIX, fuente AbuseIPDB o descripción de IP maliciosa; al ser una pregunta centrada en atribución, esta omisión es menos grave, pero sigue siendo parcial.\\
 		\textbf{¿Muestra bien el estado y confidence?} 0/2 - No menciona el estado Active ni la Confidence 100 del indicador, ni tampoco el abuseConfidenceScore 100 o el Score 50 presentes en el contexto.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 1/2 - Menciona uno de los actores inferidos, thegentlemen, pero ignora incransom y no explica correctamente que ambos proceden de búsqueda por similitud semántica; además trata thegentlemen como atribución cuando el contexto solo lo presenta como información inferida.\\
@@ -1763,6 +1817,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente el indicador explícito 62.211.188.248 y recoge sus atributos principales, aunque para esta pregunta el indicador explícito es secundario frente a la atribución a actores.\\
 		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente Status: Active, Confidence 100, Score 50, Detection False, fuente AbuseIPDB, país IT, lastReportedAt, periodo de validez y referencia externa; aunque este criterio no es central para una pregunta de atribución, la respuesta lo cubre adecuadamente.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom y explica que proceden de la sección de similitud semántica, sin tratarlos como evidencia directa.\\
@@ -1816,6 +1871,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales: officeonlaine.com y http://officeonlaine.com/up/update.exe, e identifica que ambos están relacionados con el IOC en OpenCTI.\\
 		\textbf{¿Muestra bien el estado y confidence?} 1/2 - Menciona correctamente que ambos indicadores están Revoked, pero omite la Confidence 100, el Score 60 del dominio, el Score 30 de la URL y Detection: True; por tanto, cubre el estado pero no todos los atributos de confianza y puntuación.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona los threat actors inferidos thegentlemen e incransom y aclara que proceden del contexto CTI contextual, sin tratarlos como información confirmada.\\
@@ -2015,6 +2071,7 @@ Este anexo recoge los detalles de la evaluación realizada, incluyendo las pregu
 		
 		\vspace{0.5cm}
 		{\large \textbf{Valoración}}\\
+		\normalsize
 		\textbf{¿Menciona indicadores explícitos?} 2/2 - Menciona correctamente los dos indicadores explícitos principales, officeonlaine.com y http://officeonlaine.com/up/update.exe, incluyendo sus patrones, estados, confidence, score, detection, periodos de validez, fuente, marking y referencias externas.\\
 		\textbf{¿Muestra bien el estado y confidence?} 2/2 - Muestra correctamente que ambos indicadores están Revoked y con Confidence 100; también recoge Score 60 para el dominio, Score 30 para la URL y Detection True en ambos casos.\\
 		\textbf{¿Menciona y separa el contexto inferido?} 2/2 - Menciona correctamente los threat actors inferidos thegentlemen e incransom, indica que proceden de similarity search y aclara que no hay evidencia directa que los vincule al dominio o a la URL.\\
