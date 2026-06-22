@@ -36,7 +36,8 @@
  \usepackage{array}
  \usepackage{booktabs}
  \usepackage{cleveref}
- \usepackage{booktabs}	
+ \usepackage{booktabs}
+\hyphenation{Open-Web-UI}
  \newcolumntype{C}{>{\centering\arraybackslash}X}
  
 \addbibresource{TFG.bib}
@@ -170,7 +171,11 @@ ESCUELA DE INGENIERÍA Y ARQUITECTURA\\
  %%%%% Agradecimientos
  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section*{Agradecimientos}
+A mi familia y amigos, por ser y por estar.
 
+Al equipo de Inetum por su buena acogida y su buen ambiente.
+
+Y a Ricardo por su supervisión y sus acertadas revisiones.
 \setcounter{page}{1}
 
 \newpage
@@ -182,19 +187,19 @@ ESCUELA DE INGENIERÍA Y ARQUITECTURA\\
 	Los resultados cualitativos y cuantitativos, obtenidos mediante una rúbrica formal de evaluación sobre siete tipologías de consulta, demuestran la viabilidad del sistema y una alta estabilidad en los tiempos de inferencia local administrados por \textit{Ollama}. El análisis comparativo concluye que existe un balance crítico entre coste de cómputo y madurez cognitiva: mientras que el modelo ligero \textit{Lily-Cybersecurity-7B-v0.2} destaca por su velocidad, muestra debilidades ante la ambigüedad conceptual; por su parte, \textit{CyberOSS-2.0-20B} exhibe un razonamiento lógico superior para la resolución de grafos de atribución complejos. También se comprueba que, aunque los tiempos de respuesta tienden a estabilizarse en torno a unos valores medios, factores como la complejidad de las tareas o la densidad contextual pueden influir en torno a un 30\% en el tiempo invertido por un modelo en generar una respuesta. Finalmente, se establece que el rendimiento de los modelos pequeños se incrementa notablemente al guiar sus tareas mediante comandos concretos en lugar de peticiones generales, validando la utilidad operativa de la plataforma como asistente local en la respuesta automatizada ante incidentes.
 \vspace{1.5em}
 
-\noindent \textbf{Palabras clave:} Inteligencia Artificial, \textit{On-Premise}, RAG, OpenCTI, ChromaDB, OpenWebUI, Indicadores de Compromiso (IoC), Ciberseguridad.
+\noindent \textbf{Palabras clave:} Inteligencia Artificial, \textit{On-Premise}, RAG, OpenCTI, ChromaDB, OpenWebUI, Indicadores de Compromiso, Ciberseguridad.
 \
 \newpage
 \selectlanguage{english}
 \begin{center}
 	\textbf{Abstract}
 \end{center}
-	\noindent This project addresses the design, development, and implementation of a private, local (on-premise) conversational assistance platform adapted to cybersecurity for the secure analysis of indicators of compromise. In response to the risk of sensitive corporate information leakage through third-party commercial services, this work proposes a modular open-source architecture that guarantees full data sovereignty, operating under strict hardware constraints, with processing performed exclusively on CPU and RAM. The implemented development methodology is based on a retrieval-augmented generation system with a hybrid extraction approach: on the one hand, it automatically consumes relational knowledge graphs under the STIX 2.1 standard from the OpenCTI cyber threat intelligence platform and, on the other hand, it retrieves adjacent analytical context through semantic similarity searches in the ChromaDB vector database. The analyst's interactive interface is managed through OpenWebUI, orchestrating the workflows through a server interconnected with a FastAPI service \textit{backend}.
+	\noindent This project addresses the design, development, and implementation of a private, local (on-premise) conversational assistance platform adapted to cybersecurity for the secure analysis of indicators of compromise. In response to the risk of sensitive corporate information leakage through third-party commercial services, this work proposes a modular open-source architecture that guarantees full data sovereignty, operating under strict hardware constraints, with processing performed exclusively on CPU and RAM. The implemented development methodology is based on a retrieval-augmented generation system with a hybrid extraction approach: on the one hand, it automatically consumes relational knowledge graphs under the STIX 2.1 standard from the OpenCTI cyber threat intelligence platform and, on the other hand, it retrieves adjacent analytical context through semantic similarity searches in the ChromaDB vector database. The analyst's interactive interface is managed through OpenWebUI, orchestrating the workflows through a server interconnected with a FastAPI service backend.
 
 	The qualitative and quantitative results, obtained through a formal evaluation rubric across seven types of queries, demonstrate the feasibility of the system and high stability in local inference times managed by \textit{Ollama}. The comparative analysis concludes that there is a critical trade-off between computational cost and cognitive maturity: while the lightweight model \textit{Lily-Cybersecurity-7B-v0.2} stands out for its speed, it shows weaknesses when facing conceptual ambiguity; in contrast, \textit{CyberOSS-2.0-20B} exhibits superior logical reasoning for resolving complex attribution graphs. It is also shown that, although response times tend to stabilize around average values, factors such as task complexity or contextual density can influence the time required by a model to generate a response by around 30\%. Finally, this work establishes that the performance of smaller models increases notably when their tasks are guided through concrete commands rather than general requests, validating the operational usefulness of the platform as a local assistant for automated incident response.
 \vspace{1.5em}
 	
-	\noindent \textbf{Keywords:} Artificial Intelligence, On-Premise, RAG, OpenCTI, ChromaDB, OpenWebUI, Indicators of Compromise (IoC), Cybersecurity.
+	\noindent \textbf{Keywords:} Artificial Intelligence, On-Premise, RAG, OpenCTI, ChromaDB, OpenWebUI, Indicators of Compromise, Cybersecurity.
 	
 \selectlanguage{spanish}
 \renewcommand{\tablename}{Tabla}
@@ -241,7 +246,7 @@ Adicionalmente, se incluyen el Anexo~\ref{apx:organizacion} con el registro de t
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Conceptos previos}
 \label{chap:conceptos}
-En este capítulo se introducen los conceptos fundamentales de ciberseguridad e IA que es necesario conocer para entender el desarrollo del proyecto en capítulos posteriores. Primero se intorducen los conceptos de respuesta a incidentes e indicadores de compromiso. A continuación , se explican la ciberinteligencia de amenazas y la plataforma OpenCTI. Después se introducen los modelos de lenguaje a gran escala, seguido de los motores de inferencia local y finalmente la generación aumentada por recuperación.
+En este capítulo se introducen los conceptos fundamentales de ciberseguridad e IA que es necesario conocer para entender el desarrollo del proyecto. Primero se introducen los conceptos de respuesta a incidentes e indicadores de compromiso. A continuación, se explican la ciberinteligencia de amenazas y la plataforma OpenCTI. Después se introducen los modelos de lenguaje a gran escala, seguido de los motores de inferencia local y finalmente la generación aumentada por recuperación.
 \section{Respuesta a incidentes e indicadores de compromiso}
 
 En el ámbito de la ciberseguridad corporativa, la Respuesta a Incidentes (IR, por sus siglas en inglés de \textit{Incident Response}) constituye la metodología estructurada y sistemática que adopta una organización para la detección, contención, mitigación y recuperación frente a incidentes de seguridad y ciberataques. De acuerdo con los estándares de la industria, el objetivo primordial de la IR abarca tanto la prevención proactiva de ciberataques, como la minimización del impacto en el negocio en caso de que una intrusión se complete de manera exitosa. 
@@ -250,11 +255,11 @@ Para operativizar esta estrategia, las organizaciones definen sus tecnologías, 
 
 Para el estudio del estado de la ciberinteligencia en el marco de la respuesta a incidentes, los analistas dependen de los IoCs. En el campo de la informática forense y el análisis de malware, un IoC se define como cualquier artefacto, registro o evidencia digital identificado en un sistema operativo, un dispositivo de red o un flujo de tráfico que permite constatar, con un determinado nivel de confianza, la presencia de una actividad maliciosa o el compromiso de un activo~\cite{oasis2021stix}. 
 
-En el marco del estándar internacional STIX 2.1~\cite{oasis2021stix}, la arquitectura de datos sobre la que se fundamenta la plataforma OpenCTI utilizada en este proyecto, conviene establecer una distinción técnica entre un observable (SCO, \textit{STIX Cyber Observable}) y un \textit{indicador} (SDO, \textit{STIX Domain Object}). Un observable representa un dato técnico en bruto desprovisto de intencionalidad. Una dirección IP, un dominio o el hash de un binario son observables que pueden pertenecer tanto a servicios legítimos de la infraestructura como a servidores del atacante.Un indicador es la entidad que aporta contexto semántico y de seguridad al observable. Un indicador asocia un patrón de búsqueda (definido bajo estándares como STIX Pattern, reglas YARA o firmas Sigma) a un observable específico, determinando un período de validez temporal, relaciones con campañas de actores de amenazas y un nivel de certeza técnica de maliciosidad.
+En el marco del estándar internacional STIX 2.1~\cite{oasis2021stix}, la arquitectura de datos sobre la que se fundamenta la plataforma OpenCTI utilizada en este proyecto, conviene establecer una distinción técnica entre un observable (SCO, \textit{STIX Cyber Observable}) y un \textit{indicador} (SDO, \textit{STIX Domain Object}). Un observable representa un dato técnico en bruto desprovisto de intencionalidad. Una dirección IP, un dominio o el hash de un binario son observables que pueden pertenecer tanto a servicios legítimos de la infraestructura como a servidores del atacante. Un indicador es la entidad que aporta contexto semántico y de seguridad al observable. Un indicador asocia un patrón de búsqueda (definido bajo estándares como STIX Pattern, reglas YARA o firmas Sigma) a un observable específico, determinando un período de validez temporal, relaciones con campañas de actores de amenazas y un nivel de certeza técnica de maliciosidad.
 
 Para el alcance del sistema desarrollado en este proyecto, se consideran y analizan los siguientes tipos de observables e indicadores de compromiso técnicos:
 \begin{itemize}
-    \item \textbf{URLs} identificadas como maliciosas, habitualmente vinculadas a servidores de descarga de cargas útiles (\textit{payloads}), portales de suplantación de identidad o paneles de control de botnets.
+    \item \textbf{URLs} identificadas como maliciosas, habitualmente vinculadas a servidores de descarga de cargas útiles, portales de suplantación de identidad o paneles de control de botnets.
     \item \textbf{Hashes} de ficheros identificados como códigos dañinos. El uso de funciones de dispersión criptográfica permite identificar unívocamente muestras de malware. Para este proyecto se contemplan SHA-256, SHA-1 y MD5.
     \item \textbf{Direcciones IPv4} identificadas como maliciosas, asociadas comúnmente a infraestructura de Comando y Control, nodos de salida Tor o proxies utilizados para el escaneo de vulnerabilidades.
     \item \textbf{Dominios} web identificados como maliciosos, utilizados para enmascarar direcciones IP de infraestructura atacante mediante técnicas de resolución dinámica de nombres.
@@ -272,7 +277,7 @@ La integración de la IA propuesta en este trabajo encuentra su motivación en e
 \section{Ciberinteligencia de amenazas y OpenCTI}
 CTI consiste en la recopilación, análisis y estructuración de información sobre amenazas activas o potenciales con el fin de anticipar, detectar y mitigar ataques de forma proactiva~\cite{santos2025}. Esta disciplina permite a los equipos de seguridad comprender el contexto, las motivaciones y las metodologías de los adversarios, optimizando la toma de decisiones estratégicas y los tiempos de respuesta ante incidentes.
 
-Para centralizar y procesar este conocimiento, las organizaciones emplean plataformas especializadas (TIP, \textit{Threat Intelligence Platforms}) como OpenCTI, una herramienta de código abierto diseñada para estructurar, almacenar, organizar y visualizar información técnica y no técnica sobre ciberamenazas. El núcleo de OpenCTI se fundamenta en un grafo de conocimiento basado en el estándar internacional STIX 2.1. En esta arquitectura, la inteligencia se modela mediante dos elementos~\cite{openctidata}: los nodos, que representan SDOs, y aristas, que representan conexiones entre entidades y las relacionan mediante SCOs y sirven como evidencia de actividad maliciosa.
+Para centralizar y procesar este conocimiento, las organizaciones emplean plataformas especializadas como OpenCTI, una herramienta de código abierto diseñada para estructurar, almacenar, organizar y visualizar información técnica y no técnica sobre ciberamenazas. El núcleo de OpenCTI se fundamenta en un grafo de conocimiento basado en el estándar internacional STIX 2.1. En esta arquitectura, la inteligencia se modela mediante dos elementos~\cite{openctidata}: los nodos, que representan SDOs, y aristas, que representan conexiones entre entidades y las relacionan mediante SCOs y sirven como evidencia de actividad maliciosa.
 
 \section{Modelos de Lenguaje de Gran Escala}
 Los LLM son sistemas basados en redes neuronales profundas diseñados para comprender, procesar y generar lenguaje natural. Para que el modelo pueda procesar el texto en lenguaje humano, este debe someterse a un proceso de tokenización, en el cual se divide el flujo de caracteres en unidades discretas menores llamadas \textit{tokens} (que pueden ser palabras, subpalabras o caracteres individuales)~\cite{jm3}.
@@ -303,7 +308,7 @@ Para dar soporte y agilizar la etapa de recuperación en tiempo real, se emplean
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \chapter{Análisis, diseño e implementación del sistema}
 \label{chap:sistema}
-En este capítulo se explica el proceso de diseño y construcción del sistema, detallando la arquitectura, las tecnologías elegidas (con sus correspondientes justificaciones) y el flujo general que sigue el sistema. El punto de partida de este capítulo es la infraestructura tecnológica preexistente de la organización, la cual dispone de una instancia de OpenCTI desplegada de manera independiente en un nodo dedicado de la red corporativa (diferente al asignado para el desarrollo).
+En este capítulo se explica el proceso de diseño y construcción del sistema desarrollado en este TFG. Primero se describe la arquitectura del sistema. A continuación, se detallan las tecnologías que se han utilizado en cada componente. Por último, se desarrolla el flujo que siguen los datos a través del sistema.
 
 \section{Arquitectura del sistema}
 La arquitectura de la solución propuesta se ha diseñado siguiendo un paradigma modular y desacoplado. Por restricciones corporativas, sólo se dispone de una máquina virtual, por lo que todo está desplegado en la misma. No obstante, el sistema está diseñado para ser fácilmente distribuible. Esta topología, detallada en el diagrama de componentes y conectores (en notación UML) de la Figura~\ref{fig:ArquitecturaCyC}, permite separar de forma estricta el plano de interacción con el usuario e inferencia local del plano de ingesta, normalización y ciberinteligencia de amenazas.
@@ -332,36 +337,36 @@ A nivel de infraestructura, la comunicación entre los componentes se realiza a 
 \section{Pila tecnológica}
 Con el propósito de estructurar de forma modular el asistente inteligente, la arquitectura del sistema propuesto se articula en torno a los siguientes componentes:
 \begin{itemize}
-    \item \textbf{Motor de inferencia local y selección de modelos:} Para la ejecución de los modelos de lenguaje de gran escala bajo un entorno local, se evaluaron diversas alternativas de motores de inferencia, entre las que destacaron \textit{Ollama} y vLLM. Si bien vLLM ofrece un rendimiento excepcional en la gestión de solicitudes concurrentes gracias a su algoritmo de optimización de memoria~\cite{kwon2023paged}, su arquitectura está diseñada de manera prioritaria para operar bajo aceleración por GPU. Debido a la restricción de infraestructura impuesta en este proyecto, se seleccionó \textit{Ollama} como el motor de inferencia local principal. \textit{Ollama}, desarrollado sobre C/C++, proporciona una capa de abstracción eficiente para entornos virtualizados, facilidad de configuración multimodelo mediante archivos de instrucción y una API local compatible con los estándares de la industria.
+    \item \textbf{Motor de inferencia local y selección de modelos:} Para la ejecución de los modelos de lenguaje de gran escala bajo un entorno local, se evaluaron diversas alternativas de motores de inferencia, como \textit{Ollama} y vLLM. Si bien vLLM ofrece un rendimiento excepcional en la gestión de solicitudes concurrentes gracias a su algoritmo de optimización de memoria~\cite{kwon2023paged}, su arquitectura está diseñada de manera prioritaria para operar bajo aceleración por GPU. Debido a la restricción de infraestructura impuesta en este proyecto, se seleccionó \textit{Ollama} como el motor de inferencia local principal. \textit{Ollama}, desarrollado sobre C/C++, proporciona una capa de abstracción eficiente para entornos virtualizados, facilidad de configuración multimodelo mediante archivos de instrucción y una API local compatible con los estándares de la industria.
 
-    Para posibilitar la interacción con el motor, los modelos de lenguaje se cargan en su versión cuantizada utilizando archivos de extensión \texttt{.gguf}. En cuanto a los modelos de lenguaje seleccionados, se descartaron las opciones generalistas en favor de modelos especializados en ciberseguridad mediante \textit{fine-tuning}. Esta especialización garantiza que la IA sea capaz de interpretar terminología técnica de ciberinteligencia, correlacionar observables y procesar de manera segura datos potencialmente ofensivos (como volcados de registros o firmas de malware) sin sufrir de bloqueos por políticas de seguridad corporativas comerciales. Con el fin de realizar una evaluación comparativa bajo los recursos asignados al servidor, se seleccionaron dos modelos especializados de escalas de parámetros diferenciadas:
+    Para posibilitar la interacción con el motor, los modelos de lenguaje se cargan en su versión cuantizada. En cuanto a los modelos de lenguaje seleccionados, se descartaron las opciones generalistas en favor de modelos especializados en ciberseguridad mediante \textit{fine-tuning}. Esta especialización garantiza que la IA sea capaz de interpretar terminología técnica de ciberinteligencia, correlacionar observables y procesar de manera segura datos potencialmente ofensivos (como volcados de registros o firmas de malware) sin sufrir de bloqueos por políticas de seguridad corporativas comerciales. Con el fin de realizar una evaluación comparativa bajo los recursos asignados al servidor, se seleccionaron dos modelos especializados de escalas de parámetros diferenciadas:
     \begin{itemize}
         \item \textit{Lily-Cybersecurity-7B-v0.2:} Modelo ligero desarrollado por Sego Lily Labs, ajustado sobre la arquitectura de Mistral-7B-Instruct-v0.2 a partir de un conjunto de 22.000 instrucciones de seguridad manuales~\cite{segolily2024lily}. En su cuantización a 4 bits, presenta un peso de archivo de aproximadamente 4,37 GB, lo que permite una inferencia ágil y fluida con un consumo mínimo de memoria RAM.
-        \item \textit{CyberOSS-2.0-20B (CyberPal-2.0-20B):} Modelo avanzado de la \textit{suite} de seguridad de código abierto CyberPal 2.0, ajustado sobre la arquitectura gpt-oss-20b mediante el pipeline de enriquecimiento y trazado de razonamiento técnico \textit{SecKnowledge 2.0}~\cite{levi2025toward}. En su cuantización de 4 bits (Q4\_K\_M), el tamaño del archivo asciende a 15,8 GB, demandando un mayor esfuerzo de lectura por parte de la memoria RAM del servidor, pero aportando un análisis conceptual de nivel experto.
+        \item \textit{CyberOSS-2.0-20B (CyberPal-2.0-20B):} Modelo avanzado de la \textit{suite} de seguridad de código abierto CyberPal 2.0, ajustado sobre la arquitectura gpt-oss-20b mediante el \textit{pipeline} de enriquecimiento y trazado de razonamiento técnico \textit{SecKnowledge 2.0}~\cite{levi2025toward}. En su cuantización de 4 bits (Q4\_K\_M), el tamaño del archivo asciende a 15,8 GB, demandando un mayor esfuerzo de lectura por parte de la memoria RAM del servidor, pero aportando un análisis conceptual de nivel experto.
     \end{itemize}
 
-    La elección de esta pareja de modelos permite someter la herramienta a una validación práctica frente a los benchmarks de referencia de la literatura científica~\cite{levi2025toward}. \textit{Lily-Cybersecurity-7B-v0.2} obtiene una puntuación promedio de 53,38\% en la resolución de tareas complejas de seguridad y ciberinteligencia, mientras que \textit{CyberOSS-2.0-20B} alcanza una puntuación de 80,33\% en el mismo conjunto de pruebas, superando incluso a modelos comerciales cerrados en la correlación de vulnerabilidades e identificación de tácticas.
+    La elección de esta pareja de modelos permite someter la herramienta a una validación práctica frente a los benchmarks de referencia de la literatura científica~\cite{levi2025toward}.
     \item \textbf{Interfaz gráfica de usuario y orquestación de flujos:} Para proporcionar a los analistas de ciberseguridad un entorno visual, accesible e interactivo, se evaluaron diversas plataformas autohospedadas capaces de desplegarse mediante contenedores Docker y configurarse de manera sencilla a través de parámetros de entorno. En una primera fase de diseño, se contempló la implementación de la interfaz ChatUI desarrollada por Hugging Face. Sin embargo, este entorno fue descartado debido a incompatibilidades severas en su integración nativa con el motor de inferencia local \textit{Ollama}. Durante las pruebas de concepto, la ambigüedad en la documentación oficial respecto a su interconexión local propició fallos críticos en el control del estado, tales como la imposibilidad de mapear y listar dinámicamente los modelos de \textit{Ollama}, y respuestas de los modelos no mostradas en la interfaz.
 
-    Para solucionar estos inconvenientes, se seleccionó la plataforma OpenWebUI. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de \textit{Ollama}, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web~\cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \pipelines. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje~\cite{pipelines}. Esta capacidad resulta crítica para el alcance de este proyecto, ya que proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
+    Para solucionar estos inconvenientes, se seleccionó la plataforma OpenWebUI. Esta herramienta destaca por su compatibilidad nativa e inmediata con la API de \textit{Ollama}, configuración de parámetros tanto de forma declarativa (en la configuración de Docker) como en caliente desde su panel de administración web~\cite{openwebui}. Un factor tecnológico determinante para su elección fue la disponibilidad de su arquitectura desacoplada de flujos de trabajo, denominada \pipelines. Este servidor satélite programado en Python actúa como un \textit{middleware} capaz de interceptar, filtrar y modificar las peticiones dirigidas al modelo de lenguaje~\cite{pipelines}. Esta capacidad proporciona el punto de anclaje necesario para inyectar lógica personalizada, realizar llamadas a servicios externos y canalizar las búsquedas de ciberinteligencia dentro de la base de datos vectorial de forma transparente para el analista, facilitando así la integración del sistema RAG.
     
     \item \textbf{\textit{Backend}, motor de RAG y \textit{pipelines}:} Este bloque representa el núcleo diferencial y el valor de desarrollo propio de este proyecto. Mientras que los componentes analizados hasta ahora se basan en el despliegue, parametrización y organización arquitectónica de imágenes de Docker (como OpenWebUI o la base de datos vectorial), es en esta capa donde se introduce la lógica personalizada que gobierna el flujo, tratamiento y enriquecimiento de los datos de seguridad. Aunque se describen como componentes diferenciados, el servidor de \pipelines, el \textit{backend} de servicios y el motor de RAG operan como un único subsistema lógicamente acoplado debido a su constante cooperación en tiempo real. 
 
-    El flujo de procesamiento de la información se inicia cuando el analista realiza una consulta en la interfaz gráfica que menciona un IoC, momento en el cual la solicitud es interceptada de manera inmediata por el servidor de \textit{middleware Pipelines}. En lugar de transmitir la petición de forma directa al motor de inferencia local, el \textit{pipeline} extrae el \textit{payload} y desvía la solicitud hacia un \textit{endpoint} específico de nuestro backend. Al recibir este paquete, el backend analiza la petición y llama a las funciones del motor de RAG, el cual recupera contexto técnico sobre el indicador consultando de manera estructurada tanto la API de OpenCTI como la base de datos vectorial local (ChromaDB). Una vez obtenido este contexto histórico y relacional, se devuelve en forma de respuesta al \textit{pipeline}, encargado de reformular el \textit{prompt} del usuario inyectando la información recuperada y de transmitir la instrucción final enriquecida al modelo correspondiente para que este realice su razonamiento.
+    El flujo de procesamiento de la información se inicia cuando el analista realiza una consulta en la interfaz gráfica que menciona un IoC, momento en el cual la solicitud es interceptada de manera inmediata por el servidor de \textit{middleware Pipelines}. En lugar de transmitir la petición de forma directa al motor de inferencia local, el \textit{pipeline} extrae la petición y desvía la solicitud hacia un \textit{endpoint} específico del \textit{backend}. Al recibir este paquete, el \textit{backend} analiza la petición y llama a las funciones del motor de RAG, el cual recupera contexto técnico sobre el indicador consultando de manera estructurada tanto la API de OpenCTI como la base de datos vectorial local (ChromaDB). Una vez obtenido este contexto histórico y relacional, se devuelve en forma de respuesta al \textit{pipeline}, encargado de reformular el \textit{prompt} del usuario inyectando la información recuperada y de transmitir la instrucción final enriquecida al modelo correspondiente para que este realice su razonamiento.
 
-    Para la construcción del \textit{backend} de servicios se seleccionó el marco de trabajo (\textit{framework}) FastAPI. Esta elección se fundamenta principalmente en su sencillez y en que permite un desarrollo de \textit{endpoints} de manera rápida y eficiente, facilitando un acoplamiento ágil con el resto de componentes escritos en Python. Asimismo, FastAPI destaca por su capacidad para gestionar de manera óptima la asincronía de forma nativa.
+    Para la construcción del \textit{backend} de servicios se seleccionó el marco de trabajo FastAPI. Esta elección se fundamenta principalmente en su sencillez y en que permite un desarrollo de \textit{endpoints} de manera rápida y eficiente, facilitando un acoplamiento ágil con el resto de componentes escritos en Python. Asimismo, FastAPI destaca por su capacidad para gestionar de manera óptima la asincronía de forma nativa.
     
     \item \textbf{Base de datos vectorial:} La incorporación de este componente responde a la necesidad de complementar la información relacional y estructurada obtenida de la API de OpenCTI con capacidades de recuperación semántica profunda. Mediante el uso de un modelo local de \textit{embeddings}, el sistema procesa, fragmenta e indexa tanto los informes técnicos de amenazas como los metadatos de los observables extraídos de la plataforma de ciberinteligencia. De este modo, ante una consulta del analista, la base de datos permite ejecutar búsquedas de similitud para deducir inferencias latentes y proporcionar un contexto complementario de alto valor que no se encuentra explícitamente enlazado en el grafo de conocimiento original.
 
     Para la implementación de este almacén de vectores se seleccionó ChromaDB. En primer lugar, se define como una base de datos vectorial de código abierto altamente ligera y optimizada para despliegues locales (\textit{on-premise}), lo que evita introducir una sobrecarga de infraestructura compleja o costosa en el servidor. En segundo lugar, su arquitectura modular permite que la base de datos se ejecute de forma embebida directamente dentro del proceso de Python o de manera independiente mediante un contenedor, lo que optimiza drásticamente el uso de recursos y memoria RAM en entornos limitados a CPU. Finalmente, destaca su excelente compatibilidad con el ecosistema de desarrollo de Python y su amplia adopción en la comunidad, lo que garantiza una API sencilla para operaciones de inserción, consulta, actualización y borrado, así como un soporte nativo para el filtrado avanzado de metadatos.
     
-    \item \textbf{Módulo de comunicación, ingesta y normalización de ciberinteligencia:} Este componente representa la capa de software desarrollada a medida para interactuar con la plataforma OpenCTI, resolviendo la adquisición de datos de seguridad y su transformación hacia la base de datos vectorial. La conectividad lógica con el servidor se implementa bajo el patrón de diseño \textit{Singleton} con soporte multihilo mediante un mecanismo de exclusión mutua, garantizando que exista una única instancia activa del cliente de API oficial (\texttt{OpenCTIApiClient}) durante la ejecución del sistema, lo que evita la saturación de conexiones en el nodo de OpenCTI.
+    \item \textbf{Módulo de comunicación, ingesta y normalización de ciberinteligencia:} Este componente representa la capa de software desarrollada a medida para interactuar con la plataforma OpenCTI, resolviendo la adquisición de datos de seguridad y su transformación hacia la base de datos vectorial. La conectividad lógica con el servidor se implementa bajo el patrón de diseño \textit{Singleton} con soporte multihilo mediante un mecanismo de exclusión mutua, garantizando que exista una única instancia activa del cliente de API oficial durante la ejecución del sistema, lo que evita la saturación de conexiones en el nodo de OpenCTI.
 
 Sobre esta infraestructura de conexión se articulan tres subcomponentes de desarrollo propio en Python:
 \begin{itemize}
-    \item \textbf{Cliente de consultas semánticas (\texttt{OpenCTIRAGClient}):} Componente que se ejecuta en tiempo real dentro del flujo de la conversación. Permite realizar búsquedas exactas e intermedias sobre observables e indicadores bajo la estructura del estándar STIX 2.1, rastreando de forma automática las relaciones lógicas creadas por los analistas y localizando reportes técnicos relevantes que sirvan como evidencia contextualizada para el modelo.
-    \item \textbf{Ingestor de entidades (\texttt{OpenCTIIngestor}):} Módulo encargado del aprovisionamiento masivo de datos históricos. Implementa el protocolo de paginación oficial basado en cursores de OpenCTI para descargar de forma secuencial y ordenada colecciones completas de actores de amenazas, malware, tácticas, reportes e indicadores técnicos, almacenando la información de ciberinteligencia en bruto localmente en formato JSON.
-    \item \textbf{Normalizador semántico e indexador (\texttt{OpenCTINormalizer}):} extrae las relaciones complejas y las unifica en plantillas textuales estructuradas y metadatos legibles para la IA. Posteriormente, un script de vectorización automatizado codifica estos textos normalizados en representaciones densas de 384 dimensiones empleando el modelo local \texttt{all-MiniLM-L6-v2}, insertándolos finalmente mediante un algoritmo por lotes en ChromaDB bajo una métrica de similitud de distancia del coseno para dar soporte a las búsquedas de proximidad semántica.
+    \item \textbf{Cliente de consultas semánticas:} Componente que se ejecuta en tiempo real dentro del flujo de la conversación. Permite realizar búsquedas exactas e intermedias sobre observables e indicadores bajo la estructura del estándar STIX 2.1, rastreando de forma automática las relaciones lógicas creadas por los analistas y localizando reportes técnicos relevantes que sirvan como evidencia contextualizada para el modelo.
+    \item \textbf{Ingestor de entidades:} Módulo encargado del aprovisionamiento masivo de datos históricos. Implementa el protocolo de paginación oficial basado en cursores de OpenCTI para descargar de forma secuencial y ordenada colecciones completas de actores de amenazas, malware, tácticas, reportes e indicadores técnicos, almacenando la información de ciberinteligencia en bruto localmente en formato JSON.
+    \item \textbf{Normalizador semántico e indexador:} extrae las relaciones complejas y las unifica en plantillas textuales estructuradas y metadatos legibles para la IA. Posteriormente, un \textit{script} de vectorización automatizado codifica estos textos normalizados en representaciones densas de 384 dimensiones empleando el modelo local \texttt{all-MiniLM-L6-v2}, insertándolos finalmente mediante un algoritmo por lotes en ChromaDB bajo una métrica de similitud de distancia del coseno para dar soporte a las búsquedas de proximidad semántica.
 \end{itemize}
 \end{itemize}
 
@@ -373,11 +378,11 @@ Sobre esta infraestructura de conexión se articulan tres subcomponentes de desa
     Una vez definida la distribución lógica y física de la infraestructura, se define la dinámica temporal que sigue el sistema. Como se ha mencionado previamente, el sistema sigue dos flujos de datos diferentes, por una parte está la ingesta, vectorización y almacenamiento de datos de OpenCTI (módulo \textit{Ingestor} que interactúa con OpenCTI y ChromaDB), cuyas comunicaciones están etiquetadas con números romanos en la Figura~\ref{fig:despliegue} ($I$ y $II$).
     
 \subsection{Consumo y vectorización de OpenCTI}
-El cometido del módulo \texttt{Ingestor} es conectarse a OpenCTI, configurando las credenciales adecuadas. Para cada tipo de entidad CTI que se cargará (concretamente, \textit{threat actors, malware, attack patterns, indicators y reports}), el módulo define qué atributos necesita recuperar. Para todos los tipos de objeto se cargan identificador, nombre, descripción y fecha de creación. Para \textit{threat actors} y \textit{reports}, estos son los únicos campos recuperados. Se recuperan campos adicionales para \textit{malware} (se añade la familia de \textit{malware} a la que pertenece), \textit{attack patterns}, según el identificador MITRE~\cite{attck} e \textit{indicators} (se cargan el patrón que hay que buscar para asociar el indicador a comportamiento malicioso y la sintaxis que sigue dicho patrón, por ejemplo, STIX). Así, no se descarga todo el objeto CTI, ya que esto sería un proceso muy largo y pesado, sino sólo los aspectos relevantes para las fases posteriores del procesado.
+El cometido del módulo \textit{Ingestor} es conectarse a OpenCTI, configurando las credenciales adecuadas. Para cada tipo de entidad CTI que se cargará (concretamente, \textit{threat actors, malware, attack patterns, indicators y reports}), el módulo define qué atributos necesita recuperar. Para todos los tipos de objeto se cargan identificador, nombre, descripción y fecha de creación. Para \textit{threat actors} y \textit{reports}, estos son los únicos campos recuperados. Se recuperan campos adicionales para \textit{malware} (se añade la familia de \textit{malware} a la que pertenece), \textit{attack patterns}, según el identificador MITRE~\cite{attck} e \textit{indicators} (se carga el patrón que hay que buscar para asociar el indicador a comportamiento malicioso y la sintaxis que sigue dicho patrón, por ejemplo, STIX). Así, no se descarga todo el objeto CTI, ya que esto sería un proceso muy largo y pesado, sino solo los aspectos relevantes para las fases posteriores del procesado.
 
 Los datos se recuperan mediante ingesta paginada, consumiendo todas las páginas devueltas por OpenCTI hasta que no quedan más disponibles. Esto se debe a que OpenCTI puede tener cientos de miles o incluso millones de entidades, por lo que una única llamada a la API no sería suficiente para recuperar todos los datos o, según la configuración de \textit{timeouts}, podría no devolver nada. 
 
-Una vez finalizada la extracción, guarda los datos obtenidos en ficheros \texttt{JSON} independientes. Como referencia, una ejecución de este programa, carga 55 \textit{threat actors}, 355 \textit{malwares}, 410 \textit{attack patterns}, 515.569 \textit{indicators} y 5.924 \textit{reports} (análisis realizado el 8 de junio de 2026).
+Una vez finalizada la extracción, guarda los datos obtenidos en ficheros \texttt{JSON} independientes. Como referencia, una ejecución de este programa carga 55 \textit{threat actors}, 355 \textit{malwares}, 410 \textit{attack patterns}, 515.569 \textit{indicators} y 5.924 \textit{reports} (análisis realizado el 8 de junio de 2026).
 
 El módulo \texttt{Normalizer} se encarga de la normalización de los datos brutos extraídos de OpenCTI. Transforma los objetos recuperados en documentos textuales homogéneos adecuados para su posterior vectorización. Los datos extraídos de OpenCTI se almacenan como JSON bruto, por lo que cada objeto recuperado mantiene su estructura original. Dado que los modelos de lenguajes trabajan mejor sobre texto descriptivo que sobre JSON complejos, se procesa entonces en una capa intermedia entre la ingesta bruta y la generación de \textit{embeddings} para contener, para cada objeto CTI, la información relevante en un formato legible e igual para todos los objetos de un mismo tipo para facilitar la búsqueda por parte del LLM al vectorizar el texto. Aunque indicadores y reportes se dejan tal y como están, se incluye en esta parte la búsqueda de relaciones de ciertos tipos de objetos en OpenCTI para mejorar la semántica asociada al mismo, como relaciones de tipo \texttt{uses} en \textit{threat actors} (para recuperar \textit{attack patterns} usados y \textit{malware} asociado), \textit{malware} (para recuperar \textit{attack patterns} usados) y \textit{attack patterns} (para recuperar \textit{threat actors} que usen estos patrones y técnicas).
 
@@ -390,9 +395,9 @@ El proceso de vectorización consiste en cargar los ficheros JSON generados dura
 
 Los \textit{embeddings} generados se almacenan en ficheros separados por tipo de entidad. Así, se generan ficheros independientes para \textit{threat\_actors}, \textit{malware}, \textit{attack\_patterns}, \textit{reports} e \textit{indicators}. Esta separación permite mantener una organización coherente del corpus CTI y facilita la carga posterior en colecciones diferenciadas dentro de ChromaDB. Además, guardar los \textit{embeddings} como ficheros permite diferenciar las partes del proceso de ingesta, facilitando la ejecución del proceso en caso de reconstrucción de la base de datos.
 
-Una vez generados los \textit{embeddings}, el siguiente paso consiste en cargarlos en ChromaDB. Para ello, el script de inserción se conecta al servidor de ChromaDB. Para cada tipo de entidad, el script crea o recupera una colección con el mismo nombre de la entidad. Las colecciones se configuran utilizando similitud coseno.
+Una vez generados los \textit{embeddings}, el siguiente paso consiste en cargarlos en ChromaDB. Para ello, el \textit{script} de inserción se conecta al servidor de ChromaDB. Para cada tipo de entidad, el \textit{script} crea o recupera una colección con el mismo nombre de la entidad. Las colecciones se configuran utilizando similitud coseno.
 
-Antes de insertar los documentos en ChromaDB, el script valida que los textos normalizados, los metadatos y los embeddings tengan la misma longitud. Esta validación evita desalineaciones entre documentos, vectores y metadatos. Posteriormente, la inserción se realiza por lotes, asociando a cada documento su identificador, su texto, su \textit{embedding} y sus metadatos. De este modo, cada entrada almacenada en ChromaDB conserva tanto la representación vectorial necesaria para la búsqueda semántica como la información textual y de trazabilidad necesaria para interpretar el resultado recuperado.
+Antes de insertar los documentos en ChromaDB, el \textit{script} valida que los textos normalizados, los metadatos y los embeddings tengan la misma longitud. Esta validación evita desalineaciones entre documentos, vectores y metadatos. Posteriormente, la inserción se realiza por lotes, asociando a cada documento su identificador, su texto, su \textit{embedding} y sus metadatos. De este modo, cada entrada almacenada en ChromaDB conserva tanto la representación vectorial necesaria para la búsqueda semántica como la información textual y de trazabilidad necesaria para interpretar el resultado recuperado.
 
 El resultado final de este proceso es una base vectorial organizada en colecciones CTI, donde cada documento procedente de OpenCTI puede ser recuperado por similitud semántica. Durante una consulta, el \textit{backend} RAG genera un \textit{embedding} de la pregunta o del indicador detectado y consulta las colecciones de ChromaDB para obtener los documentos más cercanos. Estos documentos se incorporan al contexto final como información contextual o inferida, diferenciándola de la inteligencia explícita recuperada directamente desde OpenCTI.
 
@@ -407,7 +412,7 @@ El analista accede a OpenWebUI, selecciona una de las opciones disponibles y esc
 
 La comunicación $1$ de la Figura~\ref{fig:despliegue} corresponde al envío de la conversación de OpenWebUI al servidor de \pipelines. Este servidor forma parte del ecosistema de OpenWebUI y permite añadir lógica personalizada antes de llamar al modelo. En este trabajo se han definido dos \textit{pipelines}: \texttt{Lily RAG} y \texttt{CyberOSS RAG}. Ambas reciben la pregunta del usuario, preparan la recuperación de contexto y, finalmente, llaman al modelo local correspondiente.
 
-Antes de continuar, la \textit{pipeline} comprueba si la petición recibida corresponde realmente a una consulta del analista o si se trata de una tarea interna de OpenWebUI. OpenWebUI puede lanzar peticiones automáticas al modelo para generar, como el título del chat, etiquetas, resúmenes o sugerencias de continuación. Estas tareas no requieren consultar OpenCTI ni ChromaDB, pero consumen los recursos dedicados a la inferencia en actividades que no resultan de interés para el analista. Por ello, si la \textit{pipeline} detecta una tarea interna, devuelve una respuesta mínima y evita ejecutar todo el flujo RAG. Este caso aparece en la Figura~\ref{fig:secuencia} como una rama alternativa.  Si, por el contrario, la petición sí corresponde a una consulta sobre CTI, la \textit{pipeline} inicia la recuperación de contexto.
+Antes de continuar, la \textit{pipeline} comprueba si la petición recibida corresponde realmente a una consulta del analista o si se trata de una tarea interna de OpenWebUI. OpenWebUI puede lanzar peticiones automáticas al modelo para generar, por ejemplo, el título del chat, etiquetas, resúmenes o sugerencias de continuación. Estas tareas no requieren consultar OpenCTI ni ChromaDB, pero consumen los recursos dedicados a la inferencia en actividades que no resultan de interés para el analista. Por ello, si la \textit{pipeline} detecta una tarea interna, devuelve una respuesta mínima y evita ejecutar todo el flujo RAG. Este caso aparece en la Figura~\ref{fig:secuencia} como una rama alternativa.  Si, por el contrario, la petición sí corresponde a una consulta sobre CTI, la \textit{pipeline} inicia la recuperación de contexto.
 
 \subsubsection*{Solicitud de contexto al \textit{backend} RAG}
 
@@ -419,7 +424,7 @@ El \textit{backend} actúa únicamente como servicio de recuperación y preparac
 
 \subsubsection*{Detección del indicador de compromiso}
 
-El primer trabajo del \textit{backend} consiste en detectar qué indicador de compromiso aparece en la pregunta. Para ello utiliza el módulo \texttt{ioc\_resolver.py}, que aplica expresiones regulares sobre el texto recibido. Esta aproximación se ha elegido porque muchos indicadores tienen formatos fácilmente reconocibles. Por ejemplo, una dirección IPv4, una URL, un dominio o un hash presentan estructuras sintácticas muy concretas. Usar expresiones regulares permite detectar estos casos de manera rápida, simple y controlada, sin necesidad de emplear soluciones más costosas o complejas.
+El primer trabajo del \textit{backend} consiste en detectar qué indicador de compromiso aparece en la pregunta. Para ello, aplica expresiones regulares sobre el texto recibido. Esta aproximación se ha elegido porque muchos indicadores tienen formatos fácilmente reconocibles. Por ejemplo, una dirección IPv4, una URL, un dominio o un hash presentan estructuras sintácticas muy concretas. Usar expresiones regulares permite detectar estos casos de manera rápida, simple y controlada, sin necesidad de emplear soluciones más costosas o complejas.
 
 El orden de detección también es relevante. Algunos indicadores pueden solaparse sintácticamente. Por ejemplo, una URL contiene un dominio, por lo que si se buscara primero un dominio podría extraerse solo una parte de la URL e ignorar parte del indicador. Para evitar este problema, el sistema aplica una precedencia fija: primero se detectan URLs, después hashes SHA-256, SHA-1 y MD5, y finalmente direcciones IPv4 y dominios. Si no se encuentra ningún IoC válido en la pregunta, el \textit{backend} devuelve un error indicándolo. Si se detecta un IoC, el flujo continúa con la resolución explícita en OpenCTI.
 
@@ -429,7 +434,7 @@ Una vez detectado el indicador, el \textit{backend} consulta OpenCTI para buscar
 
 Esta información se considera la parte fuerte del contexto, ya que procede directamente de OpenCTI. El sistema busca el IoC de varias formas: en primer lugar, intenta encontrar indicadores cuyo valor coincida directamente con el indicador consultado. En segundo lugar, revisa patrones STIX que puedan contener dicho valor. Por último, recupera informes relacionados que mencionen el indicador.
 
-El resultado de esta fase no se entrega todavía al modelo. Antes, el \textit{backend} transforma los datos recuperados en un texto estructurado y legible mediante el módulo \texttt{build\_ioc\_context}. Este módulo selecciona los campos más relevantes para el análisis, como el valor del indicador, el tipo, el estado, la confianza, el patrón STIX, la descripción, las fechas de validez o el origen. Además, se aplica una deduplicación de indicadores. Durante las pruebas se observó que la aparición repetida de la misma información podía confundir a modelos pequeños y reducir la calidad de sus respuestas. Por ello, los indicadores repetidos se agrupan utilizando una clave compuesta por los el valor del IoC, su estado, la confianza y el patrón STIX.
+El resultado de esta fase no se entrega todavía al modelo. Antes, el \textit{backend} transforma los datos recuperados en un texto estructurado y legible seleccionando los campos más relevantes para el análisis, como el valor del indicador, el tipo, el estado, la confianza, el patrón STIX, la descripción, las fechas de validez o el origen. Además, se aplica una deduplicación de indicadores. Durante las pruebas se observó que la aparición repetida de la misma información podía confundir a modelos pequeños y reducir la calidad de sus respuestas. Por ello, los indicadores repetidos se agrupan utilizando una clave compuesta por el valor del IoC, su estado, la confianza y el patrón STIX.
 
 \subsubsection*{Búsqueda semántica en ChromaDB}
 
@@ -443,22 +448,22 @@ La cantidad de documentos recuperados y el nivel de detalle dependen del perfil 
 
 \subsubsection*{Construcción del contexto final y solicitud al modelo}
 
-Cuando el \textit{backend} ya ha obtenido la información explícita de OpenCTI y el contexto semántico de ChromaDB, el módulo \texttt{builder.py} une ambos bloques en un único contexto final. Este paso aparece en la Figura~\ref{fig:secuencia} como la fase de construcción de contexto.
+Cuando el \textit{backend} ya ha obtenido la información explícita de OpenCTI y el contexto semántico de ChromaDB, se unen ambos bloques en un único contexto final. Este paso aparece en la Figura~\ref{fig:secuencia} como la fase de construcción de contexto.
 
 El contexto final conserva la separación entre ambas fuentes. Por un lado, se incluye la información explícita recuperada directamente de OpenCTI. Por otro, se añade el contexto inferido obtenido mediante similitud vectorial en ChromaDB. Esta separación es importante porque ayuda al modelo a no presentar como cierto aquello que solo se ha recuperado por similitud semántica.
 
 Una vez construido este bloque, el \textit{backend} lo devuelve a la \textit{pipeline}. Esta respuesta cierra la comunicación $2$ de la Figura~\ref{fig:despliegue}: la \textit{pipeline} había solicitado contexto y el \textit{backend} responde con el contexto consolidado.
 
-Con el contexto ya recuperado, la \textit{pipeline} construye el \textit{prompt} final que se enviará al modelo. En este punto comienza la fase de generación de respuesta, representada en la parte inferior de la Figura~\ref{fig:secuencia}. La \textit{pipeline} crea el \textit{prompt} combinando el contexto recuperado con la pregunta del usuario y unas instrucciones concretas de análisis para el modelo, como la enumeración de objetos del contexto o que comenta la separación entre contexto fuerte y contexto inferido.
+Con el contexto ya recuperado, la \textit{pipeline} construye el \textit{prompt} final que se envia al modelo. En este punto comienza la fase de generación de respuesta, representada en la parte inferior de la Figura~\ref{fig:secuencia}. La \textit{pipeline} crea el \textit{prompt} combinando el contexto recuperado con la pregunta del usuario y unas instrucciones concretas de análisis para el modelo, como la enumeración de objetos del contexto o que comente la separación entre contexto fuerte y contexto inferido.
 
-La llamada al modelo local corresponde a la comunicación $6$ de la Figura~\ref{fig:despliegue}. La \textit{pipeline} envía el \textit{prompt} a Ollama, que ejecuta el modelo seleccionado. Existe un matiz en la implementación que es transparente al usuario pero relevante en el desarrollo del proyecto: \textit{CyberOSS-2.0-20B} utiliza una plantilla de chat diferente al estándar que espera \textit{Ollama}, sino que emplea \textit{tokens} específicos, como \texttt{<|start|>user}, \texttt{<|end|>} y \texttt{<|start|>assistant} para indicar cuándo termina la pregunta del usuario y empieza la respuesta. Estos mensajes tienen que ser incluidos en el mensaje que se envía a \textit{Ollama}, y es relevante, por ejemplo, si en un futuro se quiere añadir un nuevo modelo, dado que habría que revisar qué plantilla de chat utiliza.
+La llamada al modelo local corresponde a la comunicación $6$ de la Figura~\ref{fig:despliegue}. La \textit{pipeline} envía el \textit{prompt} a Ollama, que ejecuta el modelo seleccionado. Existe un matiz en la implementación que es transparente al usuario pero relevante en el desarrollo del proyecto: \textit{CyberOSS-2.0-20B} utiliza una plantilla de chat diferente al estándar que espera \textit{Ollama}, empleando \textit{tokens} específicos como \texttt{<|start|>user}, \texttt{<|end|>} y \texttt{<|start|>assistant} para indicar cuándo termina la pregunta del usuario y empieza la respuesta. Estos mensajes tienen que ser incluidos en el mensaje que se envía a \textit{Ollama}, y es relevante, por ejemplo, si en un futuro se quiere añadir un nuevo modelo, dado que habría que revisar qué plantilla de chat utiliza.
 
 Finalmente, \textit{Ollama} ejecuta el modelo local y devuelve la respuesta generada a la \textit{pipeline}. Después, la \textit{pipeline} reenvía esa respuesta a OpenWebUI, que finalmente la muestra al analista. Este último tramo completa el flujo de consulta mostrado con los números $1$ a $6$ en la Figura~\ref{fig:despliegue}.
  
 \begin{figure}[] 
 	\centering
 	\includesvg[width=\textwidth,inkscapelatex=false]{Imagenes/secuencia.svg}
-	\caption{Workflow completo de consulta}
+	\caption{Flujo completo de consulta}
 	\label{fig:secuencia}
 \end{figure}
 
@@ -474,7 +479,7 @@ En este capítulo se comenta la experimentación realizada para probar el sistem
 Las pruebas han sido desarrolladas dentro de la máquina virtual en la que se ha llevado a cabo el desarrollo. Cuenta con 32 GB de memoria RAM, 16 vCPUs y RedHat Enterprise Linux 10 como sistema operativo.  En dicha máquina están alojados los servicios desarrollados, con OpenWebUI en la versión 0.8.11. El \textit{backend} está funcionando sobre Python 3.12.12, y se utilizan la versión 1.0.0 de ChromaDB y la versión 0.18.2 de Ollama. El servidor \textit{pipelines} funciona sobre Python 3.11.13 dentro de un contenedor Docker.
 
 \section{Descripción de experimentos}
-Para evaluar la viabilidad operativa de los modelos Lily y CyberOSS\footnote{Para este capitulo se utilizarán estos nombres acortados para referirse a los modelos debido a la cantidad de menciones a los mismos.} en el flujo de trabajo de un analista de ciberseguridad, se diseñó una batería de 7 consultas específicas basadas en indicadores reales inyectados en la base de datos vectorial mediante OpenCTI (Tabla~\ref{tab:preguntas-evaluacion}).
+Para evaluar la viabilidad operativa de los modelos Lily y CyberOSS\footnote{Para este capítulo se utilizarán estos nombres acortados para referirse a los modelos debido a la cantidad de menciones a los mismos.} en el flujo de trabajo de un analista de ciberseguridad, se diseñó una batería de 7 consultas específicas basadas en indicadores reales inyectados en la base de datos vectorial mediante OpenCTI (Tabla~\ref{tab:preguntas-evaluacion}).
 
 El propósito de este conjunto de preguntas es medir las capacidades críticas del sistema en un entorno CTI:
 \begin{itemize}
@@ -527,13 +532,40 @@ Cada una de las respuestas se puntuó utilizando una rúbrica (Tabla~\ref{tab:cr
 
 \section{Discusión de resultados}
 
-A nivel cuantitativo, los tiempos de inferencia se resumen en la Tabla~\ref{tab:tiempos} (expresados en formato \textit{mm:ss,cs}). Como era de esperar, el modelo Lily resulta mucho más rápido, con una media de 94,5 segundos por respuesta, frente a los 187,2 segundos de CyberOSS. Al ser el archivo de CyberOSS más de tres veces más pesado que el de Lily (concretamente una relación aproximada de $15,8\text{ GB} / 4,37\text{ GB} \approx 3,6\times$), la transferencia de datos ralentiza la velocidad de generación, un coste que el analista debe valorar a cambio de una mayor capacidad de análisis. Este resultado responde a un hecho físico evidente en entornos \textit{on-premise}: al no contar con aceleración por GPU, el factor limitante es la velocidad de la memoria RAM para leer los pesos del modelo
+A nivel cuantitativo, los tiempos de inferencia se resumen en la Tabla~\ref{tab:tiempos} (expresados en formato \textit{mm:ss,cs}). Como era de esperar, el modelo Lily resulta mucho más rápido, con una media de 94,5 segundos por respuesta, frente a los 187,2 segundos de CyberOSS. Al ser el archivo de CyberOSS más de tres veces más pesado que el de Lily (concretamente una relación aproximada de $15,8\text{ GB} / 4,37\text{ GB} \approx 3,6\times$), la transferencia de datos ralentiza la velocidad de generación, un coste que el analista debe valorar a cambio de una mayor capacidad de análisis. Este resultado responde a un hecho físico evidente en entornos \textit{on-premise}: al no contar con aceleración por GPU, el factor limitante es la velocidad de la memoria RAM para leer los pesos del modelo.
 
 Sin embargo, al observar las desviaciones típicas registradas en la Tabla~\ref{tab:tiempos} (00:31,2 para Lily y 00:57,6 para CyberOSS), se constata que la dispersión de los tiempos de respuesta guarda una relación directa con la longitud de los textos generados. Frente a las medias de 94,5 y 187,2 segundos, estas desviaciones representan un coeficiente de variación de alrededor del 33\% para Lily y del 30\% para CyberOSS. Estos porcentajes evidencian que el comportamiento de la inferencia local sobre CPU no es plano ni totalmente inmóvil, sino que varía de forma notable según la complejidad de la consulta y el volumen de \textit{tokens} de salida. En el caso de CyberOSS, se entiende también una inversión de tiempo extra, dado que las respuestas complejas tiende a darlas formateadas.
 
+\begin{table}[H]
+	\centering
+	\small
+	\begin{tabular}{ l c c }
+		\toprule
+		\textbf{Pregunta} & \textbf{Lily} & \textbf{CyberOSS}  \\
+		\midrule
+		Dominio conocido & 01:49,2 & 03:17,3 \\
+		IP conocida & 01:16,6 & 02:20,5 \\
+		Hash conocido & 01:29,7 & 02:45,0 \\
+		Abierta & 02:05,5 & 04:21,4 \\
+		Contexto inferido & 01:43,8 & 02:37,0 \\
+		Separación fuerte/débil explícita & 00:35,3 & 02:01,6 \\
+		Relación con actor & 02:01,5 & 04:27,4 \\
+		\midrule
+		Mejor tiempo & 00:35,3 & 02:01,6 \\
+		Peor tiempo & 02:05,5 & 04:27,4 \\
+		Rango & 01:30,2 & 02:25,7 \\
+		Media & 01:34,5 & 03:07,2 \\
+		Mediana & 01:43,8 & 02:45,0 \\
+		Desviación típica & 00:31,2 & 00:57,6 \\
+		\bottomrule
+	\end{tabular}
+	\caption{Comparativa de tiempos de respuesta (en formato \textit{mm:ss,cs})}
+	\label{tab:tiempos}
+\end{table}
+
 El análisis cualitativo de las respuestas permite estudiar el comportamiento de ambos modelos frente a diferentes estructuras de consulta. A continuación, se desglosan los resultados obtenidos en función de la naturaleza de los indicadores y de los retos interpretativos planteados en cada escenario de prueba.
 
-En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultados para dominio conocido" (Tabla~\ref{tab:dominio}), ``Resultados para IP conocida" (Tabla~\ref{tab:ip}) y ``Resultados para hash conocido" (Tabla~\ref{tab:hash}), se aprecia una clara brecha técnica. CyberOSS demuestra regularidad gracias a su mayor ventana y arquitectura, reflejando en sus respuestas los grafos estructurados de OpenCTI con solvencia. Por contra, Lily sufre para procesar de manera estricta los elementos limítrofes, recurriendo en ocasiones a generalidades de ciberseguridad en lugar de ceñirse exclusivamente a los datos de ChromaDB, lo que penaliza sus puntuaciones en las tablas de dominio (5/12) e IP (7/12).
+En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultados para dominio conocido" (Tabla~\ref{tab:dominio}), ``Resultados para IP conocida" (Tabla~\ref{tab:ip}) y ``Resultados para hash conocido" (Tabla~\ref{tab:hash}), se aprecia una clara brecha técnica. CyberOSS demuestra regularidad gracias a su mayor ventana y arquitectura, reflejando en sus respuestas los grafos estructurados de OpenCTI con solvencia. Por contra, Lily sufre para procesar de manera estricta los elementos limítrofes, recurriendo en ocasiones a generalidades de ciberseguridad en lugar de ceñirse exclusivamente a los datos, lo que penaliza sus puntuaciones en las tablas de dominio (5/12), IP (7/12) y hash (8/12).
 
 % Tabla para el dominio conocido
 \begin{table}[H]
@@ -541,7 +573,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 1 & 2 \\
 		¿Muestra bien el estado y confianza? & 1 & 2 \\
@@ -549,6 +581,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 		¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
 		¿Alucina? & 1 & 1 \\
 		¿Es útil para análisis? & 1 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{5} & \textbf{11} \\
 		\bottomrule
 	\end{tabular}
@@ -562,7 +595,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 1 & 2 \\
 		¿Muestra bien el estado y confianza? & 1 & 2 \\
@@ -570,6 +603,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 		¿Separa relaciones fuertes y débiles?  & 1 & 1\\
 		¿Alucina? & 1 & 2 \\
 		¿Es útil para análisis? & 1 & 1 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{7} & \textbf{9} \\
 		\bottomrule
 	\end{tabular}
@@ -583,7 +617,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 2 & 2 \\
 		¿Muestra bien el estado y confianza? & 2 & 2 \\
@@ -591,6 +625,7 @@ En las consultas directas sobre datos fijos, reflejadas en las tablas ``Resultad
 		¿Separa relaciones fuertes y débiles?  & 1 & 2 \\
 		¿Alucina? & 2 & 1 \\
 		¿Es útil para análisis? & 1 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{8} & \textbf{11} \\
 		\bottomrule
 	\end{tabular}
@@ -608,7 +643,7 @@ Esto demuestra de forma empírica que los modelos de menor escala son altamente 
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 2 & 2 \\
 		¿Muestra bien el estado y confianza? & 2 & 2 \\
@@ -616,6 +651,7 @@ Esto demuestra de forma empírica que los modelos de menor escala son altamente 
 		¿Separa relaciones fuertes y débiles?  & 2 & 2 \\
 		¿Alucina? & 2 & 1 \\
 		¿Es útil para análisis? & 2 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{11} & \textbf{11} \\
 		\bottomrule
 	\end{tabular}
@@ -631,7 +667,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 1 & 2 \\
 		¿Muestra bien el estado y confianza? & 0 & 2 \\
@@ -639,6 +675,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 		¿Separa relaciones fuertes y débiles?  & 0 & 2 \\
 		¿Alucina? & 0 & 2 \\
 		¿Es útil para análisis? & 0 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{2} & \textbf{12} \\
 		\bottomrule
 	\end{tabular}
@@ -652,7 +689,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 2 & 2 \\
 		¿Muestra bien el estado y confianza? & 1 & 2 \\
@@ -660,6 +697,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 		¿Separa relaciones fuertes y débiles?  & 2 & 1 \\
 		¿Alucina? & 2 & 1 \\
 		¿Es útil para análisis? & 2 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{12} & \textbf{10} \\
 		\bottomrule
 	\end{tabular}
@@ -673,7 +711,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 	\small
 	\begin{tabular}{ l c c }
 		\toprule
-		Criterio & Lily & CyberOSS  \\
+		\textbf{Criterio} & \textbf{Lily} & \textbf{CyberOSS}  \\
 		\midrule
 		¿Menciona indicadores explícitos? & 1 & 2 \\
 		¿Muestra bien el estado y confianza? & 0 & 2 \\
@@ -681,6 +719,7 @@ Esta dependencia del guiado se constata por resultado en la prueba de ``Relació
 		¿Separa relaciones fuertes y débiles?  & 0 & 1 \\
 		¿Alucina? & 1 & 1 \\
 		¿Es útil para análisis? & 1 & 2 \\
+		\midrule
 		\textbf{Puntuación} & \textbf{4} & \textbf{10} \\
 		\bottomrule
 	\end{tabular}
@@ -701,7 +740,7 @@ Como síntesis de este bloque cualitativo, la Tabla~\ref{tab:medias} consolida d
 	\small
 	\begin{tabular}{ c c c }
 		\toprule
-		& Lily & CyberOSS \\
+		& \textbf{Lily} & \textbf{CyberOSS} \\
 		\midrule
 		Promedio & 6,86 & 10,57 \\
 		Sobre 10 & 5,71 & 8,81 \\
@@ -711,36 +750,9 @@ Como síntesis de este bloque cualitativo, la Tabla~\ref{tab:medias} consolida d
 	\label{tab:medias}
 \end{table}
 
-\begin{table}[H]
-	\centering
-	\small
-	\begin{tabular}{ l c c }
-		\toprule
-		Pregunta & Lily & CyberOSS  \\
-		\midrule
-		Pregunta sobre dominio conocido & 01:49,2 & 03:17,3 \\
-		Pregunta sobre IP conocida & 01:16,6 & 02:20,5 \\
-		Pregunta sobre hash conocido & 01:29,7 & 02:45,0 \\
-		Pregunta abierta & 02:05,5 & 04:21,4 \\
-		Pregunta por contexto inferido & 01:43,8 & 02:37,0 \\
-		Separación fuerte/débil explícita & 00:35,3 & 02:01,6 \\
-		Relación con actor & 02:01,5 & 04:27,4 \\
-		\midrule
-		Mejor tiempo & 00:35,3 & 02:01,6 \\
-		Peor tiempo & 02:05,5 & 04:27,4 \\
-		Rango & 01:30,2 & 02:25,7 \\
-		Media & 01:34,5 & 03:07,2 \\
-		Mediana & 01:43,8 & 02:45,0 \\
-		Desviación típica & 00:31,2 & 00:57,6 \\
-		\bottomrule
-	\end{tabular}
-	\caption{Comparativa de tiempos de respuesta (\textit{mm:ss,cs})}
-	\label{tab:tiempos}
-\end{table}
-
 La evaluación comparativa revela un claro balance técnico entre coste de cómputo y calidad analítica: la gran fortaleza de Lily radica en su velocidad y agilidad bajo recursos estrictos de CPU, pero su debilidad es la tendencia a alucinar relaciones por proximidad semántica ante consultas abstractas o complejas; por el contrario, la fortaleza de CyberOSS es su madurez cognitiva, razonamiento lógico y resiliencia frente a la ambigüedad conceptual, siendo su única debilidad el alto tiempo de espera en inferencia debido al volumen de su arquitectura. 
 
-Desde una perspectiva operativa, covniene delegar en Lily tareas que requieran poco análisis, como la clasificación preliminar de alertas, el filtrado automatizado de observables y la generación de resúmenes bajo directrices muy específicas, mientras que el uso de CyberOSS debe reservarse para el análisis forense profundo, la resolución de grafos de atribución de amenazas complejas y la toma de decisiones estratégicas donde la precisión técnica prime sobre la inmediatez de la respuesta.
+Desde una perspectiva operativa, conviene delegar en Lily tareas que requieran poco análisis, como la clasificación preliminar de alertas, el filtrado automatizado de observables y la generación de resúmenes bajo directrices muy específicas, mientras que el uso de CyberOSS debe reservarse para el análisis forense profundo, la resolución de grafos de atribución de amenazas complejas y la toma de decisiones estratégicas donde la precisión técnica prime sobre la inmediatez de la respuesta.
 
 
 % Así se sustituye el número automáticamente:
@@ -754,9 +766,9 @@ Desde la perspectiva del diseño, el flujo de trabajo modular propuesto ha proba
 
 En el plano cualitativo, las pruebas empíricas evidencian que el rendimiento del sistema está fuertemente ligado tanto a la escala de parámetros del modelo como a la precisión de las instrucciones suministradas. Mientras que \textit{Lily-Cybersecurity-7B-v0.2} ofrece una agilidad de respuesta óptima para entornos limitados a CPU gracias a su ligereza, presenta debilidades al procesar consultas abstractas. Por el contrario, \textit{CyberOSS-2.0-20B} demuestra una madurez cognitiva superior al discriminar el ruido informativo y contextualizar la incertidumbre, asumiendo un mayor coste de tiempo debido a la inferencia puramente basada en hardware de procesamiento. Asimismo, los resultados confirman que los modelos de menor escala incrementan notablemente su precisión cuando se les guía mediante tareas y comandos concretos frente a peticiones generales. A nivel cuantitativo, los coeficientes de variación de alrededor del 30\% para ambos modelos denotan que existe una variabilidad a tener en cuenta respecto a la media, dependiendo del tamaño del contexto inyectado al modelo y la complejidad de la tarea encomendada al modelo.
 
-A partir de las conclusiones extraídas, se definen las siguientes líneas estratégicas de trabajo futuro para la evolución de la plataforma. En primer lugar, se plantea optimizar la búsqueda semántica en ChromaDB y moderar el contexto entregado a los modelos, desarrollando una capa intermedia que filtre, reorganice la información recuperada, e incorpore técnicas de compresión de contexto, algoritmos de \textit{reranking} y filtros condicionados por tipo de observable. En segundo lugar, se contempla refinar la lógica de recuperación expandiendo el sistema hacia un asistente CTI general que explote de forma nativa las relaciones de OpenCTI. Ello permitirá estructurar grafos relacionales profundos para formular análisis de campañas o perfiles de actores de amenazas basados en conocimiento formal.
+A partir de las conclusiones extraídas, se definen las siguientes líneas estratégicas de trabajo futuro para la evolución de la plataforma. En primer lugar, se plantea optimizar la búsqueda semántica en ChromaDB y moderar el contexto entregado a los modelos, desarrollando una capa intermedia que filtre, reorganice la información recuperada, e incorpore técnicas de compresión de contexto, algoritmos de reclasificación y filtros condicionados por tipo de observable. En segundo lugar, se contempla refinar la lógica de recuperación expandiendo el sistema hacia un asistente CTI general que explote de forma nativa las relaciones de OpenCTI. Ello permitirá estructurar grafos relacionales profundos para formular análisis de campañas o perfiles de actores de amenazas basados en conocimiento formal.
 
-Finalmente, en el plano del despliegue, se pretende avanzar hacia una infraestructura contenerizada completa mediante \textit{Docker}, incorporando mecanismos automatizados para actualizar la base vectorial de forma incremental sin necesidad de regenerar el índice completo por lotes. Asimismo, se contempla añadir herramientas de \textit{logging} estructurado para registrar la trazabilidad de los \textit{prompts} e inyectar un sistema heurístico de citas en la respuesta final del asistente, forzando a los modelos a indicar si una afirmación procede de la ciberinteligencia factual de OpenCTI o del almacenamiento semántico de ChromaDB.
+Finalmente, en el plano del despliegue, se pretende avanzar hacia una infraestructura contenerizada completa mediante \textit{Docker}, incorporando mecanismos automatizados para actualizar la base vectorial de forma incremental sin necesidad de regenerar el índice completo por lotes. Asimismo, se contempla añadir herramientas de registro estructurado para registrar la trazabilidad de los \textit{prompts} e inyectar un sistema heurístico de citas en la respuesta final del asistente, forzando a los modelos a indicar si una afirmación procede de la ciberinteligencia factual de OpenCTI o del almacenamiento semántico de ChromaDB.
 
 \newpage
 \printbibliography[title={Bibliografía}]
@@ -772,7 +784,7 @@ Finalmente, en el plano del despliegue, se pretende avanzar hacia una infraestru
 \vspace*{\fill}
 \normalsize
 \appendix
-\chapter{Organización del trabajo.}
+\chapter{Organización del trabajo}
 \label{apx:organizacion}
 En este anexo se recogen el desglose de tareas planificadas, reflejadas en el diagrama de Gantt (Figura~\ref{fig:gantt}) y las horas dedicadas a dichas tareas, recogidas en la Tabla~\ref{tab:tareas_tiempos}
 \begin{figure}[h!]
@@ -796,9 +808,9 @@ En este anexo se recogen el desglose de tareas planificadas, reflejadas en el di
 		Estudio de segundo modelo & 5 \\
 		Implementación segundo modelo & 5 \\
 		Comparativas y pruebas & 25 \\
-		Desarrollo memoria & Rellenaré esto al final\\
+		Desarrollo memoria & 80\\
 		\midrule
-		\multicolumn{1}{r}{\textbf{Total}} & \textbf{Más de lo mismo} \\
+		\multicolumn{1}{r}{\textbf{Total}} & \textbf{305} \\
 		\bottomrule
 	\end{tabular}
 	\caption{Tabla de tareas y tiempos}
